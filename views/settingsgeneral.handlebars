@@ -1,0 +1,46 @@
+{{#if errors}}
+      {{#each errors}}
+        <div class="alert alert-danger">{{msg}}</div>
+      {{/each}}
+{{/if}}
+<h1 style="margin-bottom: 15px; text-align: center;">Réglages</h1>
+<h4 class="" style="text-align: center;">Général</h4>
+<hr>
+<div class="col-md-12">
+<div class="text-center">
+    <a class="btn btn-rounded active btn-primary" href="/settings"><i class="fa fa-cogs"></i> Général</a>
+    <a class="btn btn-rounded btn-primary" href="/settings/privacy"><i class="fa fa-lock"></i> Sécurité et confidentialité</a>
+    <a class="btn btn-rounded btn-primary" href="/settings/data"><i class="fa fa-database"></i> Données personnelles</a>
+</div>
+</div>
+<hr>
+<form action="/settings" method="POST">
+<h3 class="text-center m-3">Changer les informations du compte:</h3>
+    <div id="name" class="col-md-6 col-centered mt-3">
+        <label >Nom: </label>
+        <input name="name" value="{{user.name}}" type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default">
+    </div>
+    <div id="email" class="col-md-6 col-centered mt-3">
+        <label >Mail: </label>
+        <input name="email" value="{{user.email}}" type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default">
+    </div>
+    <div id="username" class="col-md-6 col-centered mt-3">
+        <label >Nom d'utilisateur: </label>
+        <input name="username" value="{{user.username}}" type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default">
+    </div>
+    <div id="birthday" class="col-md-6 col-centered mt-3">
+        <label >Date d'anniversaire: </label>
+        <input id="datepicker" name="birthdate" value="{{user.birthdate}}" type="text" class="form-control">
+        <script>
+            $('#datepicker').datepicker({
+                maxViewMode: 3,
+                calendarWeeks: true
+            });
+        </script>
+    </div>
+    <div id="save" class="col-md-6 col-centered mt-3">
+        <div class="modal-footer">
+            <button type="submit" class="btn btn-primary" data-dismiss="modal">Enregistrer</button>
+        </div>
+    </div>
+</form>

@@ -1,0 +1,277 @@
+<link rel="stylesheet" href="css/admin.css"/>
+<script src="/js/packages.js" defer></script>
+<script src="/js/admin.js" defer></script>
+<script src="/js/admin-userlist.js" defer></script>
+<script src="/js/file-list.js" defer></script>
+
+
+<div class="admin-container container container-fluid">
+    <div class="unauthorized-content main-containers container-fluid">
+        <div class="admin-buttons">
+            <button type="button" onclick="openCreateAdminContent()" class="btn btn-primary">Create admin</button>
+            <button type="button" onclick="openLoginContent()" class="btn btn-primary" id="loginAdminButton">Login
+                admin
+            </button>
+        </div>
+
+        <div class="form-container container-sm register-admin-container col-md-6 hidden">
+            <div class="form-content">
+                <div class="content">
+                    <div class="header">
+                        <h5 class="title" id="exampleModalCenterTitle">Create Admin</h5>
+                    </div>
+                    <div class="body">
+                        <form id="register-admin-form" onsubmit=" return false">
+                            <div class="form-group">
+                                <label for="r-email-admin">Email address</label>
+                                <input type="email" class="form-control" id="r-email-admin" aria-describedby="emailHelp"
+                                       placeholder="Enter email">
+                            </div>
+                            <div class="form-group">
+                                <label for="r-secret-admin">Admin secret</label>
+                                <input type="text" class="form-control" id="r-secret-admin" aria-describedby="emailHelp"
+                                       placeholder="Secret code">
+                                <small id="emailHelp" class="form-text text-muted">To register admin, please enter
+                                    secret
+                                    code</small>
+                            </div>
+                            <div class="form-group form-check">
+                                <input type="checkbox" class="form-check-input" id="r-write-access">
+                                <label class="form-check-label" for="r-write-access">Write access</label>
+                            </div>
+                            <div class="form-group form-check">
+                                <input type="checkbox" class="form-check-input" id="r-update-access">
+                                <label class="form-check-label" for="r-update-access">Update access</label>
+                            </div>
+                            <div class="form-group form-check">
+                                <input type="checkbox" class="form-check-input" id="r-delete-access">
+                                <label class="form-check-label" for="r-delete-access">Delete access</label>
+                            </div>
+                            <div class="alert alert-danger hidden" role="alert" id="r-admin-error"></div>
+                            <div class="alert alert-success hidden" role="alert" id="r-admin-success"></div>
+                            <button type="submit" class="btn btn-primary"
+                                    onclick="onSubmitRegisterAdmin()">Submit
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="unauthorized-content form-container container-sm login-admin-container col-md-6">
+            <div class="form-content">
+                <div class="content">
+                    <div class="header">
+                        <h5 class="title" id="exampleModalCenterTitle">Login</h5>
+                    </div>
+                    <div class="body">
+                        <form id="login-admin-form" onsubmit=" return false">
+                            <div class="form-group">
+                                <label for="l-email-admin">Email address</label>
+                                <input type="email" class="form-control" id="l-email-admin" aria-describedby="emailHelp"
+                                       placeholder="Enter email">
+                            </div>
+                            <div class="form-group pwd-inputs hidden">
+                                <label for="l-password-admin">Password</label>
+                                <input type="password" class="form-control" id="l-password-admin"
+                                       placeholder="Password">
+                            </div>
+                            <div class="alert alert-danger hidden" role="alert" id="l-admin-error"></div>
+                            <div class="alert alert-success hidden" role="alert" id="l-admin-success"></div>
+                            <button type="submit" class="btn btn-primary hidden login-button"
+                                    onclick="onAdminLogin()">Submit
+                            </button>
+                            <button type="submit" class="btn btn-primary get-pwd" onclick="sendPassword()">Get
+                                password
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="authorized-content main-containers container-fluid hidden">
+        <header>
+            <button type="submit" class="btn btn-primary show-users-table" onclick="buildUsersList()">User list</button>
+            <button type="submit" class="btn btn-primary show-users-table" onclick="buildPackagesTable()">Package list
+            </button>
+            <button type="submit" class="btn btn-primary logout-admin-button" onclick="logoutAdmin()">Log out</button>
+        </header>
+        <div class="table-container packages hidden">
+            Edit packages
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col">Id</th>
+                    <th scope="col">Amount</th>
+                    <th scope="col">Percent</th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                </tr>
+                </thead>
+                <tbody id="packages-row-body"></tbody>
+            </table>
+        </div>
+
+        <div class="table-container users">
+            Get paid
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Balance</th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                </tr>
+                </thead>
+                <tbody id="users-row-body"></tbody>
+            </table>
+        </div>
+
+
+        <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#add-package-modal">
+            <span aria-hidden="true"><i class="fa-sharp fa-solid fa-plus"></i> Add package</span>
+        </button>
+    </div>
+</div>
+
+<div class="modal fade" id="edit-package-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+
+    <div class="modal-dialog" role="document">
+        <package>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Edit package</h5>
+                    <button type="button" class="close close-refund-modal" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <label class="edit-package-amount-label">Package amount ( in cents )</label>
+                    <input type="number" class="form-control edit-package-amount">
+                    <label class="edit-package-amount-label">Percent</label>
+                    <input type="number" class="form-control edit-package-percent">
+                </div>
+
+                <div class="alert alert-danger edit-pkg-error hidden" role="alert"></div>
+                <div class="modal-footer">
+                    <button type="button" class="close-refund-modal btn btn-secondary close-modal"
+                            data-dismiss="modal">Fermer
+                    </button>
+                    <button type="button" onclick="confirmEditPackage()"
+                            class="cfm-refund btn btn-primary">Confirmer
+                    </button>
+                </div>
+            </div>
+        </package>
+    </div>
+</div>
+
+<div class="modal fade" id="add-package-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Add package</h5>
+                <button type="button" class="close add-package-modal-button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <label class="edit-package-amount-label">Package amount ( in cents )</label>
+                <input type="number" class="form-control add-package-amount">
+                <label class="edit-package-amount-label">Percent</label>
+                <input type="number" class="form-control add-package-percent">
+            </div>
+            <div class="alert alert-danger add-pkg-error hidden" role="alert"></div>
+            <div class="modal-footer">
+                <button type="button" class="close-refund-modal btn btn-secondary close-modal"
+                        data-dismiss="modal">Fermer
+                </button>
+                <button type="button" onclick="confirmAddPackage()"
+                        class="cfm-refund btn btn-primary">Confirmer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="delete-package-modal" tabindex="-1" role="dialog"
+     aria-labelledby="delete-package-modal-label" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <delete-package>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="delete-package-title">Delete package ?</h5>
+                    <button type="button" class="close close-delete-modal" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="alert alert-danger delete-pkg-error" role="alert"></div>
+
+                <div class="modal-footer">
+                    <button type="button" class="delete-pkg-modal btn btn-secondary close-modal"
+                            data-dismiss="modal">Fermer
+                    </button>
+                    <button type="button" onclick="onConfirmDeletePackage()" class=" btn btn-primary">Confirmer</button>
+                </div>
+            </div>
+        </delete-package>
+    </div>
+</div>
+
+<div class="modal fade" id="get-paid-withdrawal-modal" tabindex="-1" role="dialog"
+     aria-labelledby="get-paid-withdrawal-modal" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <get-paid>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Get paid</h5>
+                    <button type="button" class="close close-get-paid-modal" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <span class="get-paid-header-user"></span>
+
+                <div class="modal-body">
+                    <label class="edit-package-amount-label">Montant</label>
+                    <input type="number" class="form-control get-paid-amount">
+                </div>
+
+                <div class="alert alert-danger get-paid-error hidden" role="alert"></div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary close-modal"
+                            data-dismiss="modal">Fermer
+                    </button>
+                    <button type="button" onclick="confirmWithdraw()" class=" btn btn-primary">Confirmer</button>
+                </div>
+            </div>
+        </get-paid>
+    </div>
+</div>
+
+<div class="modal fade" id="file-list-popup" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">File list</h5>
+                <button type="button" class="close " data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <ol class="file-list-modal-body"></ol>
+
+            <div class="alert alert-danger get-paid-error hidden" role="alert"></div>
+
+        </div>
+    </div>
+</div>

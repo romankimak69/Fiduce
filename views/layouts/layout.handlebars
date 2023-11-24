@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Fiduce</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link href="https://fonts.googleapis.com/css?family=Raleway:400,700" rel="stylesheet">
+	<link rel="stylesheet" href="/css/bootstrap.css" />
+	<link rel="stylesheet" href="/css/toastr.min.css" />
+	<!-- <link rel="stylesheet" href="/css/fontawesome-all.css" /> -->
+	<link rel="stylesheet" href="/css/bootstrap-datepicker.min.css" />
+	<link rel="stylesheet" href="/css/header.css" />
+	<link href="/css/vanillacalendar.css" rel="stylesheet">
+	<script src="/js/jquery-3.3.1.min.js"></script>
+	<script src="/js/bootstrap.bundle.min.js"></script>
+	<script src="/js/bootstrap-datepicker.min.js"></script>
+	<script src="/js/toastr.min.js"></script>
+	<link rel="stylesheet" href="/css/style.css" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css"
+		integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w=="
+		crossorigin="anonymous" referrerpolicy="no-referrer" />
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.2.1/axios.js"
+		integrity="sha512-SXo2rCaEJmbAPoxtaSjW+/hLaVCMAJ1CX8XnIP02x6/LIaWQp4GipKxQhBwL8Tn5U/K+lD9AaM4f4mXJdKnDQw=="
+		crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	{{!--
+	<script src="/js/DragDropTouch.js"></script> --}}
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment-with-locales.min.js"
+		integrity="sha512-42PE0rd+wZ2hNXftlM78BSehIGzezNeQuzihiBCvUEB3CVxHvsShF86wBWwQORNxNINlBPuq7rG4WWhNiTVHFg=="
+		crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+
+<body>
+	<header class=" scroll_header_top_area  stick scrolled_not_transparent sticky_mobile page_header">
+		<div class="header_inner clearfix" style="padding-top: 0px;">
+			<!-- <form role="search" action="https://fiduce.fr/" class="qode_search_form_2" method="get">
+				<div class="container">
+					<div class="container_inner clearfix">
+						<div class="form_holder_outer">
+							<div class="form_holder">
+								<input type="text" placeholder="" name="s" class="qode_search_field" autocomplete="off">
+								<a class="qode_search_submit" href="javascript:void(0)">
+									<i class="qode_icon_font_awesome fa fa-search "></i>
+								</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</form> -->
+			<div class="header_top_bottom_holder">
+				<div class="header_bottom clearfix" style="">
+					<div class="container">
+						<div class="container_inner clearfix">
+							<div class="header_inner_left">
+								<div class="logo_wrapper">
+									<div class="q_logo">
+										<a itemprop="url" href="/">
+											<img itemprop="image" class="normal"
+												src="https://fiduce.fr/wp-content/uploads/2019/09/FIDUCE-Logo.png"
+												alt="Logo" style="height: 100%;">
+											{{!-- <img itemprop="image" class="light"
+												src="https://fiduce.fr/wp-content/uploads/2019/04/logo-header-small.png"
+												alt="Logo" style="height: 100%;">
+											<img itemprop="image" class="dark"
+												src="https://fiduce.fr/wp-content/uploads/2019/04/logo-header-small.png"
+												alt="Logo" style="height: 100%;">
+											<img itemprop="image" class="sticky"
+												src="https://fiduce.fr/wp-content/uploads/2019/04/logo-header-small.png"
+												alt="Logo" style="height: 100%;">
+											<img itemprop="image" class="mobile"
+												src="https://fiduce.fr/wp-content/uploads/2019/04/logo-new.jpg"
+												alt="Logo" style="height: 100%;"> --}}
+											{{!-- <img itemprop="image" class="popup"
+												src="https://fiduce.fr/wp-content/themes/fiducecustom/img/logo_white.png"
+												alt="Logo" style="height: 100%;"> --}}
+										</a>
+									</div>
+								</div>
+							</div>
+
+
+							<div class="header_inner_right">
+
+								<div class="side_menu_button_wrapper right">
+
+									<div class="header_bottom_right_widget_holder">
+
+										<div class="widget_text header_bottom_widget widget_custom_html">
+											<div class="textwidget custom-html-widget">
+												{{#unless loggedin}}
+												<ul class="headr_icons">
+													<li>
+														<a href="/users/login/" title="Espace client">
+															<img src="https://fiduce.fr/wp-content/uploads/2019/09/login_icon.svg"
+																alt="Espace client">
+														</a>
+													</li>
+													<li>
+														<a href="/users/register/" title="S’enregistrer">
+															<img src="https://fiduce.fr/wp-content/uploads/2019/09/reg_icon.svg"
+																alt="S’enregistrer">
+														</a>
+													</li>
+												</ul>
+												{{/unless}}
+											</div>
+										</div>
+									</div>
+									<!-- <div class="side_menu_button">
+										<a class="search_button search_slides_from_header_bottom normal" href="javascript:void(0)">
+											<i class="qode_icon_font_awesome fa fa-search "></i>
+										</a>
+									</div> -->
+									<div id="mobileMenuButton" class="mobile_menu_button">
+										<span>
+											<i class="fas fa-bars"></i>
+										</span>
+									</div>
+								</div>
+							</div>
+
+                            {{#if loggedin}}
+                                <div class="header-central-menu">
+                                    <a class="btn btn-rounded btn-primary" href="/dashboard">
+                                        <i class="fa fa-address-card-o" aria-hidden="true"></i>
+                                        <span class="tableau-de-borde-button-text">Tableau de  bord</span>
+                                        </a>
+                                <div class="user-balance-menu">
+
+                                    <div class="balance-menu-section">
+                                        <a class="add-funds-button" href="/payments">
+                                            Ajouter </br>
+                                            des fonds</br>
+                                        </a>
+                                        <a class="balance-text" href="/payments"> {{balance}}
+                                            &euro;
+                                        </a>
+                                    </div>
+
+                                </div>
+                                </div>
+                            {{/if}}
+							<nav class="main_menu drop_down right">
+								<ul id="menu-side_header_menu" class="">
+									<li id="nav-menu-item-337"
+										class="menu-item menu-item-type-post_type menu-item-object-page  narrow">
+										<a href="https://fiduce.fr/fiduce-la-blockchain-immobilier/" class="">
+											<i class="menu_icon blank fa"></i>
+											<span>Blockchain</span>
+											<span class="plus"></span>
+										</a>
+									</li>
+                                    <li id="nav-menu-item-337"
+										class="menu-item menu-item-type-post_type menu-item-object-page  narrow">
+										<a href="/packages" class="">
+											<i class="menu_icon blank fa"></i>
+											<span>Choix des gains</span>
+											<span class="plus"></span>
+										</a>
+									</li>
+									<li id="nav-menu-item-355"
+										class="menu-item menu-item-type-post_type menu-item-object-page menu-item-has-children  has_sub narrow">
+										<a href="https://fiduce.fr/services/" class=" no_link" style="cursor: default;"
+											onclick="JavaScript: return false;">
+											<i class="menu_icon blank fa"></i>
+											<span>Services</span>
+											<span class="plus"></span>
+										</a>
+										<div class="second" style="height: 0px;">
+											<div class="inner">
+												<ul>
+													<li id="nav-menu-item-356"
+														class="menu-item menu-item-type-post_type menu-item-object-page ">
+														<a href="https://fiduce.fr/services/pret-professionnel/"
+															class="">
+															<i class="menu_icon blank fa"></i>
+															<span>Prêt professionnel</span>
+															<span class="plus"></span>
+														</a>
+													</li>
+													<li id="nav-menu-item-357"
+														class="menu-item menu-item-type-post_type menu-item-object-page ">
+														<a href="https://fiduce.fr/services/pret-immobilier/" class="">
+															<i class="menu_icon blank fa"></i>
+															<span>Prêt immobilier</span>
+															<span class="plus"></span>
+														</a>
+													</li>
+													<li id="nav-menu-item-359"
+														class="menu-item menu-item-type-post_type menu-item-object-page ">
+														<a href="https://fiduce.fr/services/immobilier-neuf/" class="">
+															<i class="menu_icon blank fa"></i>
+															<span>Immobilier Neuf</span>
+															<span class="plus"></span>
+														</a>
+													</li>
+													<li id="nav-menu-item-575"
+														class="menu-item menu-item-type-post_type menu-item-object-page ">
+														<a href="https://fiduce.fr/services/assurance-pret-immobilier/"
+															class="">
+															<i class="menu_icon blank fa"></i>
+															<span>Assurance Pret Immobilier</span>
+															<span class="plus"></span>
+														</a>
+													</li>
+												</ul>
+											</div>
+										</div>
+									</li>
+									<li id="nav-menu-item-601"
+										class="menu-item menu-item-type-post_type menu-item-object-page  narrow">
+										<a href="https://fiduce.fr/courtier-en-pret-immobilier-fiduce/" class="">
+											<i class="menu_icon blank fa"></i>
+											<span>Courtiers</span>
+											<span class="plus"></span>
+										</a>
+									</li>
+									<li id="nav-menu-item-360"
+										class="menu-item menu-item-type-post_type menu-item-object-page  narrow">
+										<a href="https://fiduce.fr/simulateurs/" class="">
+											<i class="menu_icon blank fa"></i>
+											<span>Simulateurs – Outils pour les investisseurs immobilier</span>
+											<span class="plus"></span>
+										</a>
+									</li>
+									<li id="nav-menu-item-363"
+										class="menu-item menu-item-type-post_type menu-item-object-page  narrow">
+										<a href="https://fiduce.fr/partenaires/" class="">
+											<i class="menu_icon blank fa"></i>
+											<span>Partenaires</span>
+											<span class="plus"></span>
+										</a>
+									</li>
+									<li id="nav-menu-item-364"
+										class="menu-item menu-item-type-post_type menu-item-object-page menu-item-has-children  has_sub narrow">
+										<a href="https://fiduce.fr/articles/" class="">
+											<i class="menu_icon blank fa"></i>
+											<span>Articles</span>
+											<span class="plus"></span>
+										</a>
+										<div class="second" style="height: 0px;">
+											<div class="inner">
+												<ul>
+													<li id="nav-menu-item-365"
+														class="menu-item menu-item-type-post_type menu-item-object-page ">
+														<a href="https://fiduce.fr/articles/achat-immobilier/" class="">
+															<i class="menu_icon blank fa"></i>
+															<span>Achat immobilier</span>
+															<span class="plus"></span>
+														</a>
+													</li>
+													<li id="nav-menu-item-366"
+														class="menu-item menu-item-type-post_type menu-item-object-page ">
+														<a href="https://fiduce.fr/articles/immobilier-espagne/"
+															class="">
+															<i class="menu_icon blank fa"></i>
+															<span>Immobilier Espagne</span>
+															<span class="plus"></span>
+														</a>
+													</li>
+													<li id="nav-menu-item-367"
+														class="menu-item menu-item-type-post_type menu-item-object-page ">
+														<a href="https://fiduce.fr/articles/immobilier-portugal/"
+															class="">
+															<i class="menu_icon blank fa"></i>
+															<span>Immobilier Portugal</span>
+															<span class="plus"></span>
+														</a>
+													</li>
+												</ul>
+											</div>
+										</div>
+									</li>
+								</ul>
+							</nav>
+							<nav class="mobile_menu">
+								<!-- <ul id="menu-side_header_menu-1" class="" style="display: none;"> -->
+								<ul id="menu-side_header_menu-1" class="menu-side_header_menu-1">
+									<li id="mobile-menu-item-337"
+										class="menu-item menu-item-type-post_type menu-item-object-page ">
+										<a href="https://fiduce.fr/fiduce-la-blockchain-immobilier/" class="">
+											<span>Blockchain</span>
+										</a>
+										<span class="mobile_arrow">
+											<i class="fa fa-angle-right"></i>
+											<i class="fa fa-angle-down"></i>
+										</span>
+									</li>
+                                    <li id="mobile-menu-item-337"
+                                        class="menu-item menu-item-type-post_type menu-item-object-page ">
+                                        <a href="/packages" class="">
+                                            <span>Choix des gains</span>
+                                        </a>
+                                        <span class="mobile_arrow">
+											<i class="fa fa-angle-right"></i>
+											<i class="fa fa-angle-down"></i>
+										</span>
+                                    </li>
+									<li id="mobile-menu-item-355"
+										class="menu-item menu-item-type-post_type menu-item-object-page menu-item-has-children  has_sub">
+										<h3>
+											<span>Services</span>
+										</h3>
+										<span class="mobile_arrow">
+											<i class="fa fa-angle-right"></i>
+											<i class="fa fa-angle-down"></i>
+										</span>
+										<ul class="sub_menu">
+											<li id="mobile-menu-item-356"
+												class="menu-item menu-item-type-post_type menu-item-object-page ">
+												<a href="https://fiduce.fr/services/pret-professionnel/" class="">
+													<span>Prêt professionnel</span>
+												</a>
+												<span class="mobile_arrow">
+													<i class="fa fa-angle-right"></i>
+													<i class="fa fa-angle-down"></i>
+												</span>
+											</li>
+											<li id="mobile-menu-item-357"
+												class="menu-item menu-item-type-post_type menu-item-object-page ">
+												<a href="https://fiduce.fr/services/pret-immobilier/" class="">
+													<span>Prêt immobilier</span>
+												</a>
+												<span class="mobile_arrow">
+													<i class="fa fa-angle-right"></i>
+													<i class="fa fa-angle-down"></i>
+												</span>
+											</li>
+											<li id="mobile-menu-item-359"
+												class="menu-item menu-item-type-post_type menu-item-object-page ">
+												<a href="https://fiduce.fr/services/immobilier-neuf/" class="">
+													<span>Immobilier Neuf</span>
+												</a>
+												<span class="mobile_arrow">
+													<i class="fa fa-angle-right"></i>
+													<i class="fa fa-angle-down"></i>
+												</span>
+											</li>
+											<li id="mobile-menu-item-575"
+												class="menu-item menu-item-type-post_type menu-item-object-page ">
+												<a href="https://fiduce.fr/services/assurance-pret-immobilier/"
+													class="">
+													<span>Assurance Pret Immobilier</span>
+												</a>
+												<span class="mobile_arrow">
+													<i class="fa fa-angle-right"></i>
+													<i class="fa fa-angle-down"></i>
+												</span>
+											</li>
+										</ul>
+									</li>
+									<li id="mobile-menu-item-601"
+										class="menu-item menu-item-type-post_type menu-item-object-page ">
+										<a href="https://fiduce.fr/courtier-en-pret-immobilier-fiduce/" class="">
+											<span>Courtiers</span>
+										</a>
+										<span class="mobile_arrow">
+											<i class="fa fa-angle-right"></i>
+											<i class="fa fa-angle-down"></i>
+										</span>
+									</li>
+									<li id="mobile-menu-item-360"
+										class="menu-item menu-item-type-post_type menu-item-object-page ">
+										<a href="https://fiduce.fr/simulateurs/" class="">
+											<span>Simulateurs – Outils pour les investisseurs immobilier</span>
+										</a>
+										<span class="mobile_arrow">
+											<i class="fa fa-angle-right"></i>
+											<i class="fa fa-angle-down"></i>
+										</span>
+									</li>
+									<li id="mobile-menu-item-363"
+										class="menu-item menu-item-type-post_type menu-item-object-page ">
+										<a href="https://fiduce.fr/partenaires/" class="">
+											<span>Partenaires</span>
+										</a>
+										<span class="mobile_arrow">
+											<i class="fa fa-angle-right"></i>
+											<i class="fa fa-angle-down"></i>
+										</span>
+									</li>
+									<li id="mobile-menu-item-364"
+										class="menu-item menu-item-type-post_type menu-item-object-page menu-item-has-children  has_sub">
+										<a href="https://fiduce.fr/articles/" class="">
+											<span>Articles – Guide de l’acheteur immobilier</span>
+										</a>
+										<span class="mobile_arrow">
+											<i class="fa fa-angle-right"></i>
+											<i class="fa fa-angle-down"></i>
+										</span>
+										<ul class="sub_menu_2">
+											<li id="mobile-menu-item-365"
+												class="menu-item menu-item-type-post_type menu-item-object-page ">
+												<a href="https://fiduce.fr/articles/achat-immobilier/" class="">
+													<span>Achat immobilier</span>
+												</a>
+												<span class="mobile_arrow">
+													<i class="fa fa-angle-right"></i>
+													<i class="fa fa-angle-down"></i>
+												</span>
+											</li>
+											<li id="mobile-menu-item-366"
+												class="menu-item menu-item-type-post_type menu-item-object-page ">
+												<a href="https://fiduce.fr/articles/immobilier-espagne/" class="">
+													<span>Immobilier Espagne</span>
+												</a>
+												<span class="mobile_arrow">
+													<i class="fa fa-angle-right"></i>
+													<i class="fa fa-angle-down"></i>
+												</span>
+											</li>
+											<li id="mobile-menu-item-367"
+												class="menu-item menu-item-type-post_type menu-item-object-page ">
+												<a href="https://fiduce.fr/articles/immobilier-portugal/" class="">
+													<span>Immobilier Portugal</span>
+												</a>
+												<span class="mobile_arrow">
+													<i class="fa fa-angle-right"></i>
+													<i class="fa fa-angle-down"></i>
+												</span>
+											</li>
+										</ul>
+									</li>
+								</ul>
+							</nav>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</header>
+	<div id="content" class="container wrap space-top-body">
+		<!-- Example row of columns -->
+
+
+		<div class="row">
+			<div class="col-md-12">
+
+				{{#if success_msg}}
+				<div class="alert alert-info">{{success_msg}}</div>
+				{{/if}}
+
+				{{#if error_msg}}
+				<div class="alert alert-danger">{{error_msg}}</div>
+				{{/if}}
+
+				{{#if error}}
+				<div class="alert alert-danger">{{error}}</div>
+				{{/if}}
+
+				{{{body}}}
+			</div>
+		</div>
+		<hr>
+		<div id="push"></div>
+	</div> <!-- /container -->
+	<footer class="footer navbar navbar-default navbar-fixed-bottom">
+		<div class="container">
+			<ul class="navbar-text mr-auto col-centered d-block" style="padding: 0;">
+				<li class="nav-link d-inline-block pull-right"><a
+						href="https://www.youtube.com/channel/UCZlf900FzcPqbTXrIfQMNXQ?view_as=subscriber"
+						class="navbar-btn btn-danger btn">
+						<i class="fab fa-youtube"></i></a></li>
+
+				<li class="nav-link d-inline-block"><a href="https://www.linkedin.com/in/fiduce-sas/"
+						style="color: white; background: blue;" class="navbar-btn btn">
+						<i class="fab fa-linkedin-in"></i></a></li>
+
+				<li class="nav-link d-inline-block"><a href="https://twitter.com/Fiduce_fr?lang=fr"
+						style="color: white; background: rgb(35, 137, 255);" class="navbar-btn btn">
+						<i class="fab fa-twitter"></i></a></li>
+
+				<li class="nav-link d-inline-block"><a href="https://www.facebook.com/fiduce.fr/"
+						style="color: white; background: rgb(30, 109, 199);" class="navbar-btn btn">
+						<i class="fab fa-facebook"></i></a></li>
+			</ul>
+			<p style="padding-top: 20px;" class="navbar-text col-md-12 text-center">Copyright © Fiduce {{currentYear}}
+			</p>
+		</div>
+		</div>
+		<!--Start Cookie Script-->
+		<script type="text/javascript" charset="UTF-8"
+			src="http://chs03.cookie-script.com/s/83f7395d80a68782405bd3722cc12b78.js"></script>
+		<!--End Cookie Script-->
+		<script type="text/javascript">
+			$(window).scroll(function () {
+				var top = $(this).scrollTop();
+				if (top > 62) {
+					$("#topbar").addClass("border-top");
+				} else {
+					$("#topbar").removeClass("border-top");
+				}
+			});
+
+			$(document).ready(function () {
+				toastr.options = {
+					"closeButton": true,
+					"positionClass": "toast-bottom-right",
+					"showDuration": "300",
+					"hideDuration": "1000",
+					"timeOut": "6000",
+					"extendedTimeOut": "5000",
+					"showEasing": "swing",
+					"hideEasing": "linear",
+					"showMethod": "fadeIn",
+					"hideMethod": "fadeOut"
+				}
+
+				$('#mobileMenuButton').click(function () {
+
+					if ($('#menu-side_header_menu-1').hasClass('menu-side_header_menu-1')) {
+						$('#menu-side_header_menu-1').removeClass('menu-side_header_menu-1');
+						$('#menu-side_header_menu-1').addClass('menu-side_header_menu-1_expanded');
+						$('ul.sub_menu li').hide();
+					} else if ($('#menu-side_header_menu-1').hasClass('menu-side_header_menu-1_expanded')) {
+						$('#menu-side_header_menu-1').removeClass('menu-side_header_menu-1_expanded');
+						$('#menu-side_header_menu-1').addClass('menu-side_header_menu-1');
+					}
+				});
+
+				$('.fa.fa-angle-right').click(function () {
+					if ($(this).parent().parent().children('ul').hasClass('sub_menu')) {
+						$('ul.sub_menu li').fadeIn('0.5s');
+						$(this).parent().parent().children('ul').removeClass('sub_menu');
+						$(this).parent().parent().children('ul').addClass('sub_menu_expanded');
+					} else if ($(this).parent().parent().children('ul').hasClass('sub_menu_2')) {
+						$('ul.sub_menu_2 li').fadeIn('0.5s');
+						$(this).parent().parent().children('ul').removeClass('sub_menu_2');
+						$(this).parent().parent().children('ul').addClass('sub_menu_expanded_2');
+					} else if ($(this).parent().parent().children('ul').hasClass('sub_menu_expanded')) {
+						$('ul.sub_menu_expanded li').fadeOut('0.5s');
+						$(this).parent().parent().children('ul').removeClass('sub_menu_expanded');
+						$(this).parent().parent().children('ul').addClass('sub_menu');
+					} else if ($(this).parent().parent().children('ul').hasClass('sub_menu_expanded_2')) {
+						$('ul.sub_menu_expanded_2 li').fadeOut('0.5s');
+						$(this).parent().parent().children('ul').removeClass('sub_menu_expanded_2');
+						$(this).parent().parent().children('ul').addClass('sub_menu_2');
+					}
+				});
+			})
+		</script>
+		{{#if loggedin}}
+		<script>
+			var timeoutID;
+
+			function setup() {
+				this.addEventListener("mousemove", resetTimer, false);
+				this.addEventListener("mousedown", resetTimer, false);
+				this.addEventListener("keypress", resetTimer, false);
+				this.addEventListener("DOMMouseScroll", resetTimer, false);
+				this.addEventListener("mousewheel", resetTimer, false);
+				this.addEventListener("touchmove", resetTimer, false);
+				this.addEventListener("MSPointerMove", resetTimer, false);
+
+				startTimer();
+			}
+			setup();
+
+			function startTimer() {
+				// wait 3 minuts before calling goInactive
+				timeoutID = window.setTimeout(goInactive, 6 * 60 * 1000);
+			}
+
+			function resetTimer(e) {
+				window.clearTimeout(timeoutID);
+
+				goActive();
+			}
+
+			function goInactive() {
+				$.ajax({
+					type: "GET",
+					url: "/users/checkactive",
+					success: function (res) {
+						resetTimer();
+					},
+					error: function (err) {
+						window.location = "/users/logout";
+					}
+				});
+
+			}
+
+			function goActive() {
+				startTimer();
+			}
+		</script>
+		{{/if}}
+		<script src="https://kit.fontawesome.com/d2af60f68f.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,36 @@
+{{#if errors}}
+      {{#each errors}}
+        <div class="alert alert-danger">{{msg}}</div>
+      {{/each}}
+{{/if}}
+<h1 style="margin-bottom: 15px; text-align: center;">Réglages</h1>
+<h4 class="" style="text-align: center;">Sécurité et confidentialité</h4>
+<hr>
+<div class="col-md-12">
+<div class="text-center">
+    <a class="btn btn-rounded btn-primary" href="/settings"><i class="fa fa-cogs"></i> Général</a>
+    <a class="btn btn-rounded active btn-primary" href="/settings/privacy"><i class="fa fa-lock"></i> Sécurité et confidentialité/a>
+    <a class="btn btn-rounded btn-primary" href="/settings/data"><i class="fa fa-database"></i> Données personnelles</a>
+</div>
+</div>
+<hr>
+<form action="/settings/privacy" method="POST">
+    <h3 class="text-center m-3">Changer de mot de passe:</h3>
+    <div id="oldpassword" class="col-md-6 col-centered mb-3">
+        <label>Ancien mot de passe : </label>
+        <input name="oldpassword" placeholder="********" type="password" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default">
+    </div>
+    <div id="password" class="col-md-6 col-centered mb-3">
+        <label>Nouveau mot de passe: </label>
+        <input name="password" placeholder="********" type="password" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default">
+    </div>
+    <div id="passwordre" class="col-md-6 col-centered mb-3">
+        <label>Confirmer votre mot de passe: </label>
+        <input name="passwordre" placeholder="********" type="password" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default">
+    </div>
+    <div id="save" class="col-md-6 col-centered">
+        <div class="modal-footer">
+            <button type="submit" class="btn btn-primary" data-dismiss="modal">Enregistrer</button>
+        </div>
+    </div>
+</form>

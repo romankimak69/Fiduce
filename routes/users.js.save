@@ -1,0 +1,386 @@
+const express = require('express');
+
+const router = express.Router();
+const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
+const randomstring = require('randomstring');
+const HttpError = require('http-errors');
+const User = require('../models/user');
+const ResetPassword = require('../models/resetpassword');
+
+const Dir = require('../models/directory');
+const TrackedEvent = require('../models/trackedevent');
+const { sendMail } = require('../utils/mailer');
+const { decrypt, encrypt } = require('../utils/encrypte-decrypte');
+const { ensureAuthenticated } = require('../utils/auth');
+const { getRandomPwd, resToJson } = require('../utils/utils');
+const rateLimiterMiddleware = require("../rateLimiter");
+const ensureNotAuthenticated = (req, res, next) => (
+  req.isAuthenticated() ? res.redirect('/') : next()
+);
+
+function sendVerifyEmailLink(req, user) {
+  const data = { email: user.email, time: new Date().getTime() };
+  const hash = encrypt(JSON.stringify(data));
+  const link = `http://${req.headers.host}/users/confirmemail?i=${hash.iv}&c=${hash.content}`;
+  const subject = 'Vos informations de connexion Fiduce';
+  const html = `<p>Bonjour ${user.name},</p>
+	<p>Voici votre identifiant:<br />${user.username}</p>
+	<p>Nous vous remercions de l'intérêt que vous portez à Fiduce et nous resterons à votre entière disposition pour tout complément d'information.</p>
+	<p>Pour terminer votre inscription, veuillez cliquer sur le lien suivant pour valider l'adresse e-mail de votre compte.</p>
+	<p><a href="${link}">${link}</a></p>
+	<p>Profitez de Fiduce!</p>
+	<p>Cordialement,</p>
+	<img src="https://fiduce.fr/wp-content/themes/fiducecustom/img/logo_white.png">`;
+
+  sendMail(user.email, subject, html);
+}
+
+// Register
+router.get('/register', ensureNotAuthenticated, (req, res) => res.render('register'));
+
+// Login
+router.get('/login', ensureNotAuthenticated, (req, res) => res.render('login'));
+
+router.get('/passwordreset', (req, res) => res.render('passwordreset'));
+
+router.get('/checkactive', (req, res) => {
+  if (req.isAuthenticated()) { return res.status(200).send(); } return res.status(403).send();
+});
+
+router.get('/confirmemail', (req, res) => {
+  try {
+    const iv = req.query.i;
+    const content = req.query.c;
+
+    if (!iv || !content) { throw 'Invalid paramters'; }
+
+    const hash = { iv, content };
+
+    let data;
+    try {
+      data = JSON.parse(decrypt(hash));
+    } catch { throw 'Invalid parameters'; }
+
+    const expireDuration = 30 * 60 * 1000; // 300 Minutes
+
+    if (data.time > (new Date().getTime() + expireDuration)) { throw 'Le lien a expiré'; }
+
+    User.getUserByEmail(data.email, (err, user) => {
+      if (err || !user) { return res.render('404'); }
+      user.mailVerified = true;
+      user.save();
+      return res.redirect('/');
+    });
+  } catch (err) {
+    res.render('confirmemail', {
+      errors: [{ msg: err }],
+    });
+  }
+});
+
+router.get('/passwordreset/:urlval', (req, res) => {
+  const { urlval } = req.params;
+  ResetPassword.getResetPassword(urlval, (err, reset) => {
+    if (reset) {
+      if (reset.dateexpiring > new Date().getTime()) {
+        res.render('passwordresetstage2');
+      } else {
+        res.redirect('/users/passwordreset');
+      }
+    } else {
+      res.redirect('/users/passwordreset');
+    }
+  });
+});
+
+router.post('/passwordreset/:urlval', (req, res) => {
+  const { urlval } = req.params;
+  ResetPassword.getResetPassword(urlval, (err, reset) => {
+    if (reset) {
+      if (reset.dateexpiring > new Date().getTime()) {
+        const { password } = req.body;
+        const { repassword } = req.body;
+        req.checkBody('password', 'Mot de passe requis').notEmpty();
+        req.checkBody('repassword', 'Les mots de passe ne correspondent pas').equals(req.body.password);
+        const errors = req.validationErrors();
+
+        if (errors) {
+          console.log(errors);
+          res.render('passwordresetstage2', {
+            errors,
+          });
+        } else {
+          User.changePassword(reset.username, password);
+          reset.remove();
+          res.redirect('/users/login');
+        }
+      } else {
+        res.redirect('/users/passwordreset');
+      }
+    } else {
+      res.redirect('/users/passwordreset');
+    }
+  });
+});
+
+router.post('/passwordreset', (req, res) => {
+  User.getUserByEmail(req.body.email, (err, user) => {
+    if (user != null) {
+      let number = null;
+      do {
+        var val = randomstring.generate();
+        var reset = ResetPassword.getResetPassword(val);
+        console.log(reset);
+        if (reset == null) {
+          number = val;
+        }
+      }
+      while (!val);
+
+      const date = new Date().getTime();
+      const time = 30 * 60 * 1000;
+      //    HOURS MINUTES SECONDS MS
+      var reset = new ResetPassword({
+        urlval: val,
+        date,
+        dateexpiring: date + time,
+        owner: user.id,
+      });
+      ResetPassword.new(reset, (err, newreset) => {
+        if (err) throw err;
+        console.log(newreset);
+      });
+
+      const link = `http://${req.headers.host}/users/passwordreset/${val}`;
+      const to = req.body.email;
+      const subject = 'Forgot Password';
+      const html = `<p>Bonjour,</p>
+			<p>Vous avez perdu votre mot de passe</p>
+			<p>Veuillez cliquer sur le lien suivant afin de réinitialiser votre mot de passe de connexion à la plateforme Fiduce : <a href="${link}">${link}</a></p>
+			<p>Ce lien est valable pendant 30 min.</p>
+			<p>Nous vous remercions de l'intérêt que vous avez porté aux services Fiduce et restons à votre entière disposition pour toute information complémentaire.</p>
+			<p>Cordialement,</p>`;
+
+      sendMail(to, subject, html, null, null, (err, info) => {
+        if (err) {
+          return console.log(err);
+        }
+        console.log('Message sent: %s', info.messageId);
+        res.render('passwordreset', { success_msg: 'Email sent. Please check your email inbox for further instructions (Check spam also)' });
+      });
+    } else {
+      res.render('passwordreset', { error_msg: 'There is no account linked to that email address.' });
+    }
+  });
+});
+
+router.post('/register', rateLimiterMiddleware,async (req, res) => {
+  const { name } = req.body;
+  const { email } = req.body;
+  const { username } = req.body;
+  const { birthdate } = req.body;
+  const { accounttype } = req.body;
+
+  req.checkBody('email', 'Email est requis').notEmpty();
+  req.checkBody('email', 'Email is not valid').isEmail();
+  req.checkBody('username', "Nom d'utilisateur est nécessaire").notEmpty();
+
+  if (gregorianAge(req.body.birthdate, undefined) < 18) {
+    req
+      .checkBody('birthdate', "Vous n'êtes pas assez vieux. Pour utiliser Fiduce, vous devez avoir au moins 18 ans.")
+      .equals('');
+  }
+
+  const errors = req.validationErrors();
+
+  if (errors) {
+    console.log(errors);
+    return res.render('register', { errors });
+  }
+  const emailUser = await User.findOne(
+    { email: { $regex: `^${email}\\b`, $options: 'i' } },
+  );
+
+  const existedUser = await User.findOne({ username: { $regex: `^${username}\\b`, $options: 'i' } });
+
+  if (emailUser || existedUser) {
+    return res.render('register', { user: existedUser, mail: emailUser });
+  }
+
+  const password = getRandomPwd();
+
+  const user = new User({
+    name, email, username, birthdate, accounttype, password,
+  });
+
+  await sendMail(email, 'Support', `Your password is ${password}`);
+  await user.save();
+  const newDir1 = Dir({
+    owner: user.id,
+    parent: '',
+    name: 'Prêt immobilier',
+    shared: '',
+    date: new Date().getTime(),
+    deletable: false,
+  });
+  const newDir2 = Dir({
+    owner: user.id,
+    parent: '',
+    name: 'Modèle de contrats',
+    shared: '',
+    date: new Date().getTime(),
+    deletable: false,
+  });
+  const newDir3 = Dir({
+    owner: user.id,
+    parent: '',
+    name: 'Agreements',
+    shared: '',
+    date: new Date().getTime(),
+    deletable: false,
+  });
+  Dir.createDir(newDir1, (dir1) => {
+    Dir.createDir(newDir2, (dir2) => {
+      Dir.createDir(newDir3, (dir3) => {
+        sendVerifyEmailLink(req, user);
+        req.flash('success_msg', 'Vous êtes inscrit et pouvez maintenant vous connecter');
+        res.redirect('/users/login');
+      });
+    });
+  });
+});
+
+router.patch('/password', resToJson(async (req, res) => {
+  const { username } = req.body;
+
+  const user = await User.findOne({ username });
+  if (!user) {
+    throw new HttpError(404, 'Nom d\'utilisateur inconnu');
+  }
+
+  const password = await user.genPassword();
+
+  await sendMail(user.email, 'Support', `Your password is ${password}`);
+
+  res.status(202);
+
+  return 'sended';
+}));
+
+passport.use(new LocalStrategy(
+  { passReqToCallback: true },
+  (req, username, password, done) => {
+    if (!username || username == '' || !password || password == '') {
+      return done(null, false, { message: "Le nom d'utilisateur et le mot de passe sont requis." });
+    }
+
+    User.getUserByUsername(username, (err, user) => {
+      if (err) throw err;
+      if (!user) {
+        return done(null, false, { message: 'Utilisateur inconnu' });
+      }
+
+      User.comparePassword(password, user.password, (err, isMatch) => {
+        if (err) throw err;
+        if (isMatch) {
+          TrackedEvent.createTrackedEvent('Login', '', user.id, (err, event) => {
+            if (!user.mailVerified) {
+              sendVerifyEmailLink(req, user);
+              return done(null, false, { message: "L'email n'est pas verifié. Merci de consulter vos emails." });
+            }
+            return done(null, user);
+          });
+        } else {
+          return done(null, false, { message: "L'email n'est pas verifié. Merci de consulter vos emails." });
+        }
+      });
+    });
+  },
+));
+
+passport.serializeUser((user, done) => {
+  done(null, user.id);
+});
+
+passport.deserializeUser((id, done) => {
+  User.getUserById(id, (err, user) => {
+    done(err, user);
+  });
+});
+
+router.post(
+  '/login',
+  (req, res, next) => passport.authenticate('local', {
+    successRedirect: `/${req.query.redirectTo ?? 'dashboard'}`,
+    failureRedirect: '/users/login',
+    failureFlash: true,
+  })(req, res, next),
+  (req, res) => {
+    res.redirect('/dashboard');
+  },
+);
+
+router.get('/logout', ensureAuthenticated, (req, res) => {
+  TrackedEvent.createTrackedEvent('Logout', '', req.user.id, (err, event) => {
+    req.logout();
+    req.flash('success_msg', 'Vous êtes déconnecté');
+    res.redirect('/');
+  });
+});
+
+router.get('/user/:ID', ensureAuthenticated, (req, res) => {
+  User.getUserById(req.params.ID, (err, user) => {
+    if (req.params.ID == req.user.id) {
+      res.render('userprofile', { loggedin: true, ismine: true, profile: user });
+    } else {
+      res.render('userprofile', { loggedin: true, profile: user });
+    }
+  });
+});
+
+router.post('/user/:ID', ensureAuthenticated, (req, res) => {
+  if (req.params.ID == req.user.id) {
+    if (req.body.ss) {
+      User.getUserById(req.user.id, (err, user) => {
+        user.shortstatus = req.body.ss;
+        user.save();
+        req.flash('success_msg', 'Le statut court a été modifié avec succès!');
+        res.redirect(`/users/user/${req.params.ID}`);
+      });
+    } else if (req.body.desc) {
+      User.getUserById(req.user.id, (err, user) => {
+        user.description = req.body.desc;
+        user.save();
+        req.flash('success_msg', 'La description a bien été modifiée!');
+        res.redirect(`/users/user/${req.params.ID}`);
+      });
+    } else {
+      req.flash('error_msg', "Une erreur s'est produite. Veuillez réessayer!");
+      res.redirect(`/users/user/${req.params.ID}`);
+    }
+  }
+});
+
+function gregorianAge(birthDate, ageAtDate) {
+  // convert birthDate to date object if already not
+  if (Object.prototype.toString.call(birthDate) !== '[object Date]') { birthDate = new Date(birthDate); }
+
+  // use today's date if ageAtDate is not provided
+  if (typeof ageAtDate === 'undefined') { ageAtDate = new Date(); }
+
+  // convert ageAtDate to date object if already not
+  else if (Object.prototype.toString.call(ageAtDate) !== '[object Date]') { ageAtDate = new Date(ageAtDate); }
+
+  // if conversion to date object fails return null
+  if (ageAtDate == null || birthDate == null) { return null; }
+
+  const _m = ageAtDate.getMonth() - birthDate.getMonth();
+
+  // answer: ageAt year minus birth year less one (1) if month and day of
+  // ageAt year is before month and day of birth year
+  return (ageAtDate.getFullYear()) - birthDate.getFullYear()
+		- ((_m < 0 || (_m === 0 && ageAtDate.getDate() < birthDate.getDate())) ? 1 : 0);
+}
+
+module.exports = router;

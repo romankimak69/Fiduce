@@ -1,0 +1,84 @@
+.invoices-table-container .hidden {
+    display: none
+}
+
+.pagination {
+    display: flex;
+    width: 50%
+}
+
+.pagination .paginationjs {
+    flex-basis: 100%;
+    display: flex;
+    justify-content: flex-start;
+}
+
+.pagination .paginationjs .paginationjs-pages {
+    display: flex;
+}
+
+.paginationjs-pages ul {
+    list-style-type: none;
+    display: flex;
+    width: 100%;
+    flex: 100%;
+    flex-basis: 100%;
+}
+
+.paginationjs-pages ul li {
+
+    width: 20px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.invoice-table {
+    display: inline-table
+}
+
+.invoice-table th {
+    text-align: center;
+}
+
+.refunds-button {
+    border: none;
+    background: none;
+    cursor: pointer
+}
+
+.refund-modal-message.hidden {
+    display: none
+}
+
+.refund-modal-message {
+    text-align: center;
+    color: #5fb4b0
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type=number] {
+    -moz-appearance: textfield;
+}
+
+@media (min-width: 320px) and (max-width: 400px) {
+    .invoices-table-container .refund-button {
+        display: none
+    }
+}
+
+@media (min-width: 320px) and (max-width: 507px) {
+    .invoices-table-container {
+        font-size: 0.60rem;
+    }
+}
+
+@media (min-width: 736px) {
+    .invoices-table {
+        right: 90px
+    }
+}

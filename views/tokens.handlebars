@@ -1,0 +1,174 @@
+<script src="/js/tokens.js" defer></script>
+<link rel="stylesheet" href="/css/tokens.css" />
+<h1 class="page-header" style="text-align: center;">Porte-monnaie électonique</h1>
+<hr>
+<div class="col-md-12">
+    <div class="text-center">
+
+        <button type="button" class="btn btn-rounded btn-secondary" data-toggle="modal" data-target="#modalHelp"><i
+                class="fa fa-question-circle"></i> Aide</button>
+        <a class="btn btn-rounded btn-primary" href="/upload">
+            <i class="fa fa-cloud-upload" aria-hidden="true"></i>
+            <span class="">Uploader  RIB </span>
+        </a>
+        <div class="modal text-center fade" id="modalHelp" tabindex="-1" role="dialog" aria-labelledby="modalHelp"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+
+                    <div class="modal-body">
+                        <div class="col-md-12">
+                            <hr>
+                            <div class="text-center">
+                                Envoyez un mail à hello@fiduce.fr ou appelez au 01 85 14 95 64
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal text-center fade" id="modalSend" tabindex="-1" role="dialog" aria-labelledby="modalSend"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="title">Envoyer FiduceCoin</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div id="txbody" class="modal-body">
+                        <div class="col-md-8 col-centered centered">
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text" id="basic-addon1">To: </span>
+                                </div>
+                                <input id="adTo" type="text" class="form-control" placeholder="eg. 0x4307...."
+                                    aria-label="Address to" aria-describedby="basic-addon1">
+                            </div>
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text" id="basic-addon1">Montant:</span>
+                                </div>
+                                <input id="amTx" type="text" class="form-control" placeholder="Montant en FiduceCoin"
+                                    aria-label="Montant" aria-describedby="basic-addon1">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                        <button type="button" id="sendTx" class="btn btn-success">Envoyer FDCN</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<hr>
+<div class="container">
+
+    <div class="row">
+        <div class="col text-center">
+            <h5 id="package">
+                Vous avez souscrit au bonus de {{percent}} %
+            </h5>
+            <h5 id="Profit">
+                Votre profit actuel est de {{profit}} {{currency}}
+            </h5>
+            <button onclick="openReclaimModal()" type="button" class="btn btn-primary btn-rounded btn-primary"
+                data-toggle="modal" data-target="#exampleModal">
+                Gain
+            </button>
+        </div>
+        <div class="col text-center">
+            <h3>Balance: {{balance}} &euro; </h3>
+        </div>
+        <script>
+            async function getERC20() {
+                var address, contractAddress, contractABI, tokenContract, decimals, balance, name, symbol, adjustedBalance
+                address = web3.eth.accounts[0]
+                contractAddress = "0x70fd763ea56b4becc5e73a4024936c155b6f284b"
+                contractABI = [{ "constant": true, "inputs": [], "name": "name", "outputs": [{ "name": "", "type": "string" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": false, "inputs": [{ "name": "_spender", "type": "address" }, { "name": "_value", "type": "uint256" }], "name": "approve", "outputs": [{ "name": "success", "type": "bool" }], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": true, "inputs": [], "name": "ICOSupply", "outputs": [{ "name": "", "type": "uint256" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [], "name": "totalSupply", "outputs": [{ "name": "", "type": "uint256" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": false, "inputs": [{ "name": "_from", "type": "address" }, { "name": "_to", "type": "address" }, { "name": "_value", "type": "uint256" }], "name": "transferFrom", "outputs": [{ "name": "success", "type": "bool" }], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": true, "inputs": [], "name": "ICOTotalSupply", "outputs": [{ "name": "", "type": "uint256" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [], "name": "decimals", "outputs": [{ "name": "", "type": "uint8" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [], "name": "version", "outputs": [{ "name": "", "type": "string" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [{ "name": "_owner", "type": "address" }], "name": "balanceOf", "outputs": [{ "name": "balance", "type": "uint256" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [], "name": "symbol", "outputs": [{ "name": "", "type": "string" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [], "name": "moneyCollectedInWei", "outputs": [{ "name": "", "type": "uint256" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": false, "inputs": [{ "name": "_to", "type": "address" }, { "name": "_value", "type": "uint256" }], "name": "transfer", "outputs": [{ "name": "success", "type": "bool" }], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": false, "inputs": [{ "name": "_spender", "type": "address" }, { "name": "_value", "type": "uint256" }, { "name": "_extraData", "type": "bytes" }], "name": "approveAndCall", "outputs": [{ "name": "success", "type": "bool" }], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": true, "inputs": [{ "name": "_owner", "type": "address" }, { "name": "_spender", "type": "address" }], "name": "allowance", "outputs": [{ "name": "remaining", "type": "uint256" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": false, "inputs": [{ "name": "_beneficiary", "type": "address" }], "name": "buyTokens", "outputs": [], "payable": true, "stateMutability": "payable", "type": "function" }, { "inputs": [], "payable": false, "stateMutability": "nonpayable", "type": "constructor" }, { "payable": true, "stateMutability": "payable", "type": "fallback" }, { "anonymous": false, "inputs": [{ "indexed": true, "name": "_from", "type": "address" }, { "indexed": true, "name": "_to", "type": "address" }, { "indexed": false, "name": "_value", "type": "uint256" }], "name": "Transfer", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": true, "name": "_owner", "type": "address" }, { "indexed": true, "name": "_spender", "type": "address" }, { "indexed": false, "name": "_value", "type": "uint256" }], "name": "Approval", "type": "event" }]
+                tokenContract = web3.eth.contract(contractABI).at(contractAddress)
+                document.getElementById("account").innerHTML = "<b>" + address + "</b>";
+                tokenContract.decimals(function (err, decimals) {
+                    tokenContract.name(function (err, name) {
+                        tokenContract.symbol(function (err, symbol) {
+                            tokenContract.ICOTotalSupply(function (err, totalico) {
+                                tokenContract.ICOSupply(function (err, ico) {
+                                    tokenContract.moneyCollectedInWei(function (err, ethico) {
+                                        adjustedICO = ethico / Math.pow(10, decimals)
+                                        document.getElementById("ico").innerHTML = "<b>" + adjustedICO + " ETH</b><br>";
+                                        adjustedICOPer = (totalico - ico) * 100 / totalico;
+                                        document.getElementById("ico").innerHTML += "(" + adjustedICOPer + "%)";
+                                        tokenContract.balanceOf(address, function (err, balance) {
+                                            adjustedBalance = balance / Math.pow(10, decimals)
+                                            document.getElementById("balance").innerHTML = "<b>" + adjustedBalance + " FDCN</b><br>(FiduceCoin)";
+                                        })
+                                    })
+                                })
+                            })
+                        })
+                    })
+                })
+            }
+            $("#sendTx").click(function (event) {
+                event.preventDefault();
+                var account, contractAddress, contractABI, token
+                account = web3.eth.accounts[0]
+                contractAddress = "0x70fd763ea56b4becc5e73a4024936c155b6f284b"
+                contractABI = [{ "constant": true, "inputs": [], "name": "name", "outputs": [{ "name": "", "type": "string" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": false, "inputs": [{ "name": "_spender", "type": "address" }, { "name": "_value", "type": "uint256" }], "name": "approve", "outputs": [{ "name": "success", "type": "bool" }], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": true, "inputs": [], "name": "ICOSupply", "outputs": [{ "name": "", "type": "uint256" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [], "name": "totalSupply", "outputs": [{ "name": "", "type": "uint256" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": false, "inputs": [{ "name": "_from", "type": "address" }, { "name": "_to", "type": "address" }, { "name": "_value", "type": "uint256" }], "name": "transferFrom", "outputs": [{ "name": "success", "type": "bool" }], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": true, "inputs": [], "name": "ICOTotalSupply", "outputs": [{ "name": "", "type": "uint256" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [], "name": "decimals", "outputs": [{ "name": "", "type": "uint8" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [], "name": "version", "outputs": [{ "name": "", "type": "string" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [{ "name": "_owner", "type": "address" }], "name": "balanceOf", "outputs": [{ "name": "balance", "type": "uint256" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [], "name": "symbol", "outputs": [{ "name": "", "type": "string" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [], "name": "moneyCollectedInWei", "outputs": [{ "name": "", "type": "uint256" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": false, "inputs": [{ "name": "_to", "type": "address" }, { "name": "_value", "type": "uint256" }], "name": "transfer", "outputs": [{ "name": "success", "type": "bool" }], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": false, "inputs": [{ "name": "_spender", "type": "address" }, { "name": "_value", "type": "uint256" }, { "name": "_extraData", "type": "bytes" }], "name": "approveAndCall", "outputs": [{ "name": "success", "type": "bool" }], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": true, "inputs": [{ "name": "_owner", "type": "address" }, { "name": "_spender", "type": "address" }], "name": "allowance", "outputs": [{ "name": "remaining", "type": "uint256" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": false, "inputs": [{ "name": "_beneficiary", "type": "address" }], "name": "buyTokens", "outputs": [], "payable": true, "stateMutability": "payable", "type": "function" }, { "inputs": [], "payable": false, "stateMutability": "nonpayable", "type": "constructor" }, { "payable": true, "stateMutability": "payable", "type": "fallback" }, { "anonymous": false, "inputs": [{ "indexed": true, "name": "_from", "type": "address" }, { "indexed": true, "name": "_to", "type": "address" }, { "indexed": false, "name": "_value", "type": "uint256" }], "name": "Transfer", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": true, "name": "_owner", "type": "address" }, { "indexed": true, "name": "_spender", "type": "address" }, { "indexed": false, "name": "_value", "type": "uint256" }], "name": "Approval", "type": "event" }]
+                token = web3.eth.contract(contractABI).at(contractAddress)
+                var _sendTo = $("#adTo").val();
+
+                token.decimals(function (err, decimals) {
+                    var _amount = $("#amTx").val() * Math.pow(10, decimals);
+                    console.log(_amount);
+                    token.transfer(_sendTo, _amount, function (err, tx) {
+                        if (err) {
+                            console.log("Error: " + err);
+                        } else {
+                            $("#txbody").html("<div class='col-md-12 col'><a href='https://ropsten.etherscan.io/tx/" + tx + "'>Click here to view the transaction.</a></div>")
+                            console.log("TX: " + tx);
+                        }
+                    })
+                })
+            });
+        </script>
+
+        <script>
+            getERC20();
+        </script>
+    </div>
+</div>
+<hr>
+</div>
+<div class="col-12 tokens-central-message">
+    <span>N'oubliez pas d'uploader votre RIB afin de percevoir vos gains</span>
+</div>
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Saisir le montant</h5>
+                <button type="button" class="close close-reclaim-withdrawals" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <label class="reclaim-funds-label"></label>
+                <input type="number" class="form-control reclaim-funds-input">
+
+            </div>
+            <div class="alert alert-danger hidden reclaim-error" role="alert" id="alert-reclaim-refund"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                <button type="button" class="btn btn-primary" onclick="confirmReclaim()">Confirmer</button>
+            </div>
+        </div>
+    </div>
+</div>

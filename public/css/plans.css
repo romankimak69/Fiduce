@@ -1,0 +1,18 @@
+.packages-section{
+    text-align: center;
+}
+.packages-container{
+    justify-content: center;
+}
+.packages-container .card{
+   padding:10px
+}
+
+.packages-container .card .card-body{
+   padding: 0
+}
+
+.packages-container .card .card-text{
+   font-weight: bold;
+    padding:10px
+}

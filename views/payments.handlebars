@@ -1,0 +1,38 @@
+<link rel="stylesheet" href="css/payments.css"/>
+<script src="https://js.stripe.com/v3/"></script>
+<script src="/js/stripe-checkout.js" defer></script>
+
+<div class="col-md-12 payment-section">
+    <h1> Augmenter ses gains</h1>
+
+    <div id="payment-form-container" class="payment-container col-md-6 col-centered">
+        <form id="payment-form" class="payment-inputs needs-validation">
+            <div class="form-group">
+                <label>Montant :</label>
+                <input type="text" class="form-control input-amount" placeholder="Montant" max="99999999"
+                       pattern="([0-9]+.{0,1}[0-9]*,{0,1})*[0-9]" onkeyup="debounceInit()">
+            </div>
+            <div class="form-group">
+                <label>Numéro de carte:</label>
+                <div id="cardNumber" class="form-control payment-element"></div>
+            </div>
+
+            <div class="card-creds">
+                <div class="form-group">
+                    <label>Date d'expiration:</label>
+                    <div id="cardExpiry" class="form-control payment-element"></div>
+                </div>
+                <div class="form-group">
+                    <label>Cryptogramme:</label>
+                    <div id="cardCvc" class="form-control payment-element"></div>
+                </div>
+            </div>
+            <div id="payment-message" class="payment-message hidden"></div>
+            <button id="submit" class="btn btn-default btn-primary">
+                <div class="spinner hidden" id="spinner"><i class="fas fa-spinner fa-spin"></i></div>
+                <span id="button-text">Valider</span>
+            </button>
+        </form>
+    </div>
+</div>
+

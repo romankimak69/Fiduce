@@ -1,0 +1,227 @@
+<a href="/users/user/{{User.id}}"><h1 class="page-header" style="text-align: center;">{{User.name}}</h1></a>
+{{#if chats}}
+<div id="chats">
+        {{#each chats}}
+            {{#if mine}}
+                {{#if file}}
+                <div class="d-block" style="margin: 10px;">
+                <div class="card align-items-center row badge-primary card_shadow" style="width: 14rem; margin: 1px; text-align: center;">
+                    <!-- <img class="card-img-top" src="data:image/png;base64,{{baseimg}}" alt="No available preview"> -->
+                    <div class="card-body">
+                        <br>
+                        <h5 class="card-title">{{file.name}}.{{file.extension}}</h5>
+                        <hr>
+                        <div class="btn-group">
+                        <a target="_blank" href="/files/index/{{file.id}}" class="btn btn-light">Ouvrir dans un nouvel onglet</a>
+                        <button type="button" class="btn btn-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span class="sr-only">Basculer la liste déroulante</span>
+                        </button>
+                                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                            <h6 class="dropdown-header">Options:</h6>
+                                            <div class="dropdown-divider"></div>
+                                            <a class="dropdown-item" href="/files/index/{{file.id}}?download=true">Télécharger</a>
+                                            <a class="dropdown-item" href="#">Partager</a>
+                                            <div class="dropdown-divider"></div>
+                                            <a href="/files/index/{{file.id}}?ocr=true" class="text-info dropdown-item">Test OCR</a>
+                                            <div class="dropdown-divider"></div>
+                                            <a href="/chat/user/{{../User.id}}?remove={{id}}" class="text-danger dropdown-item">Retirer</a>
+                                        </div>
+                        </div>
+                        </div>  
+                </div>
+
+                </div>
+                {{/if}}
+                {{#unless file}}
+                <div class="d-block " style="margin: 10px;">
+                    <div class="chat minech badge-primary d-inline-block">
+                        <a href="/chat/user/{{../User.id}}?remove={{id}}" class="chat minerev d-none badge-danger">retirer</a>
+                        {{encrypted}}
+                    </div>
+                </div>
+                {{/unless}}
+            {{/if}}
+            {{#unless mine}}
+                {{#if file}}
+                <div class="d-block text-right" style="margin: 10px; direction: rtl;">
+                    <div style="margin-right: 0; direction: ltr;" class="chat align-items-center row badge-success">
+                                <div class="col-4">
+                                    <span class="file-img" style="background-image: url(/images/{{file.extension}}.png);"></span>
+                                </div>
+                                <div class="col-4 text-center">
+                                    <span class="file-name">{{file.name}}</span>
+                                </div>
+                                <div class="btn-group flex-row-reverse col-4">
+                                    <div class="dropdown">
+                                        <button class="align-middle btn btn-light btn-circle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">
+                                            <i class="fa fa-bars"></i>
+                                        </button>
+                                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                            <h6 class="dropdown-header">Options:</h6>
+                                            <div class="dropdown-divider"></div>
+                                            <a target="_blank" href="/files/index/{{file.id}}" class="text-primary dropdown-item">Ouvrir dans un nouvel onglet</a>
+                                            <div class="dropdown-divider"></div>
+                                            <a class="dropdown-item" href="/files/index/{{file.id}}?download=true">Télécharger</a>
+                                            <a href="/files/index/{{file.id}}?ocr=true" class="text-info dropdown-item">Test OCR</a>
+                                        </div>
+                                    </div>
+                                </div>
+                    </div>
+                </div>
+                {{/if}}
+                {{#unless file}}
+                <div class="d-block text-right" style="margin: 10px;">
+                    <div class="chat badge-success d-inline-block">{{encrypted}}</div>
+                </div>
+                {{/unless}}
+            {{/unless}}
+        {{/each}}
+</div>
+{{/if}}
+{{#unless chats}}
+        <span class="badge badge-pill">Vous n'avez pas commencé à discuter avec ce chat en groupe.
+        Soyez le premier au message!</span>
+{{/unless}}
+    <div class="input-group col-md-8 col-centered mt-5 mb-5">
+        <input id="message" type="text" class="border-primary form-control" name="message" placeholder="Message:" aria-label="Message:">
+        <div class="input-group-append">
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#fileModal"><i class="fa fa-file"></i></button>
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalAdd"><i class="fa fa-plus"></i></button>
+            <button onclick="postChat();" class="btn btn-primary" type="button">Envoyer</button>
+        </div>
+    </div>
+    <div class="modal fade" id="modalAdd" tabindex="-1" role="dialog" aria-labelledby="modalAdd">
+                                    <div class="modal-dialog modal-dialog-centered" role="document">
+                                        <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="title">Ajouter un contact au chat</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">×</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body text-center">
+                                            <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                                                <label class="btn btn-secondary active">
+                                                    <input type="radio" name="options" id="option1" autocomplete="off" checked=""><i class="fa fa-envelope"></i> Mail
+                                                </label>
+                                                <label class="btn btn-secondary">
+                                                    <input type="radio" name="options" id="option2" autocomplete="off"><i class="fa fa-user"></i> Nom d'utilisateur
+                                                </label>
+                                            </div>
+                                            <div class="col-md-8 col-centered mt-3 mb-5">
+                                                <form action="/chat/user/multi/{{User.id}}" method="POST" class="form-group input-group">
+                                                <input id="email" type="text" class="border-primary form-control" name="email" placeholder="Mail:" aria-label="Mail:">
+                                                <div class="input-group-append">
+                                                    <button type="submit" class="btn btn-primary"><i class="fa fa-plus"></i> Ajouter</button>
+                                                </div></form>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                                        </div>
+                                        </div>
+                                    </div>
+    </div>
+    <div class="modal fade" id="fileModal" tabindex="-1" role="dialog" aria-labelledby="fileModal" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Sélectionnez les fichiers</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                    <div id="files-top" class="list-group row col-md-10 col-centered">
+                        <div style="z-index: 1;" class="list-group-item d-flex">
+                                <div class="col-4"><span>Type :</span></div>
+                                <div class="col-4 text-center"><span>Nom :</span></div>
+                                <div class="col-4 text-right"><span>Choisir :</span></div>
+                        </div> 
+                        {{#each files}}
+                            <div class="list-group-item d-flex">
+                                <div class="col-4">
+                                    <span class="file-img" style="background-image: url(/images/{{extension}}.png);"></span>
+                                </div>
+                                <div class="col-4 text-center">
+                                    <span class="file-name">{{name}}.{{extension}}</span>
+                                </div>
+                                <div class="btn-group flex-row-reverse col-4">
+                                    
+                                        <button class="align-middle btn btn-outline-primary btn-circle" type="button" onclick="select($(this));">
+                                            <i class="fa"></i>
+                                            <input class="hash" type="hidden" value="{{id}}">
+                                        </button>
+                                </div>
+                            </div>                            
+                        {{/each}}
+                    </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                <a href="/upload?user={{User.id}}" class="btn btn-primary"><i class="fa fa-file"></i> Télécharger</a>
+                <button type="button" onclick="postFiles()" class="btn btn-primary"><i class="fa fa-arrow-right"></i> Envoyer</button>
+            </div>
+            </div>
+        </div>
+    </div>
+<script>
+    
+    
+</script>
+<script src="/js/socket.io.js"></script>
+<input type="hidden" id="userID" value="{{user.id}}"></input>
+<script>
+    var objDiv = document.getElementById("chats");
+    objDiv.scrollTop = objDiv.scrollHeight;
+    
+    var files = [];
+    
+    function select(button){
+        if(button.hasClass("btn-primary")){
+            //Checked
+            button.addClass("btn-outline-primary");
+            button.removeClass("btn-primary");
+            button.children("i").removeClass("fa-check");
+            for(var i = files.length - 1; i >= 0; i--) {
+                if(files[i] === button.children("input.hash").val()) {
+                files.splice(i, 1);
+                }
+            }
+        }else{
+            //To Check
+            button.addClass("btn-primary");
+            button.removeClass("btn-outline-primary");
+            button.children("i").addClass("fa-check");
+            files.push(button.children("input.hash").val());
+        }
+    }
+
+    function addChat(chat){
+        location.reload();
+    }
+
+    function postFiles(){
+        if(files.length != 0){
+            var chat = "";
+            for(var i = files.length - 1; i >= 0; i--) {
+                chat = "{files/" + files[i];
+                $.post("", chat);
+            }
+        }else{
+            alert("Please select a file");
+        }
+    }
+
+    function postChat(){
+        var message = $("#message").val();
+        if(message != ''){
+            $.post("", message);
+        }else{
+            alert("Please do not leave the message field empty");
+        }
+    }
+
+    var socket = io();
+    socket.on("chat", addChat);
+</script>

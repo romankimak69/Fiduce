@@ -1,0 +1,60 @@
+<link rel="stylesheet" href="css/invoice.css" />
+<script src="/js/invoices.js" defer></script>
+<script src="https://pagination.js.org/dist/2.4.2/pagination.min.js" defer></script>
+<h1 class="page-header" style="text-align: center;">Relevés</h1>
+<hr>
+
+<div class="container">
+
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <payment>
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Demande de remboursement</h5>
+                        <button type="button" class="close close-refund-modal" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <label class="refund-amount-input-label"></label>
+                        <input type="number" class="form-control refund-amount-input">
+                    </div>
+                    <div class="refund-modal-message hidden">Vous allez rembourser la totalité de la charge</div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="close-refund-modal btn btn-secondary close-modal"
+                            data-dismiss="modal">Fermer</button>
+                        <button type="button" onclick="confirmRefund()"
+                            class="cfm-refund btn btn-primary">Confirmer</button>
+                    </div>
+                </div>
+            </div>
+        </payment>
+    </div>
+
+    <div class="invoices-table-container">
+        <div class="alert alert-danger hidden"></div>
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+        <table class="table table-responsive-sm invoice-table">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">Statut</th>
+                    <th scope="col">Montant</th>
+                    <th scope="col">Remboursé</th>
+                    <th scope="col">Date</th>
+                    <th scope="col" class="refund-col">
+                        <div class="refund-button">Demande de </br> remboursement</div>
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="invoice-table-body"></tbody>
+        </table>
+        <div class="pagination"></div>
+
+    </div>
+</div>

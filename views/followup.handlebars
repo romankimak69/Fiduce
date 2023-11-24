@@ -1,0 +1,29 @@
+<h1 class="page-header" style="text-align: center;">Suivre</h1>
+<hr>
+<div class="col-md-12">
+<div class="text-center">
+    <a class="btn btn-rounded btn-primary" href="/followup/new"><i class="fa fa-plus"></i> Demander un nouveau prêt</a>
+</div>
+</div>
+<hr>
+{{#if loans}}
+    {{#each loans}}
+    <div class="card text-center">
+        <div class="card-header">
+            Courtier: {{broker}}
+        </div>
+        <div class="card-body">
+            <h5 class="card-title">{{name}}</h5>
+            <p class="card-text">{{description}}</p>
+            <a href="/followup/loan/{{id}}" class="btn btn-primary">Ouvrir</a>
+        </div>
+        <div class="card-footer text-muted">
+            {{address}} - {{date}}
+        </div>
+    </div>
+    {{/each}}
+{{else}}
+<div class="text-center">
+    <span>Vous n'avez actuellement aucun prêt.</span>
+</div>
+{{/if}}

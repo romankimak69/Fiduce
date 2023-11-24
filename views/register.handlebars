@@ -1,0 +1,38 @@
+<h1 class="page-header" style="text-align: center;">Créer un compte</h1>
+{{#if user}}
+<div class="alert alert-danger">Nom d'utilisateur a déjà pris essayer de nouvelles</div>
+{{/if}}
+{{#if mail}}
+<div class="alert alert-danger">Email a pris déjà essayer de nouvelles</div>
+{{/if}}
+{{#if errors}}
+{{#each errors}}
+<div class="alert alert-danger">{{msg}}</div>
+{{/each}}
+{{/if}}
+<div class="col-md-8 col-centered" id="register">
+  <form class="needs-validation" method="post" action="/users/register">
+    <div class="form-group">
+      <label>Nom d'utilisateur:</label>
+      <input type="text" class="form-control" placeholder="Nom d'utilisateur" name="username" required>
+    </div>
+    <div class="form-group">
+      <label>Mail:</label>
+      <input type="email" class="form-control" placeholder="Mail" name="email" required>
+    </div>
+    <div class="custom-control custom-checkbox mb-3">
+      <input type="checkbox" class="custom-control-input" id="Validation1" required>
+      <label class="custom-control-label" for="Validation1">Je reconnais avoir pris connaissance et accepté les
+        conditions générales.<a href="/privacypolicy">Les données personnelles communiquées sont uniquement utilisées
+          pour permettre l’utilisation des services Fiduce</a></label>
+      <div class="invalid-feedback">Vous devez accepter de continuer</div>
+    </div>
+    <div class="custom-control custom-checkbox mb-3">
+      <input type="checkbox" class="custom-control-input" id="Validation2" required>
+      <label class="custom-control-label" for="Validation2">Je comprends et accepte les <a href="/terms">termes et
+          conditions</a></label>
+      <div class="invalid-feedback">Vous devez accepter de continuer</div>
+    </div>
+    <button type="submit" class="btn btn-default btn-primary">Créer un compte</button>
+  </form>
+</div>

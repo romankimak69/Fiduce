@@ -1,0 +1,85 @@
+{{#if errors}}
+{{#each errors}}
+<div class="alert alert-danger">{{msg}}</div>
+{{/each}}
+{{/if}}
+<div class="container">
+    <div class="col-md-12 text-center" style="padding: 10px;">
+        <br />
+        <br />
+        <br />
+        <h4>Téléchargez des fichiers depuis Dropbox.</h4>
+        <br />
+        <br />
+        <button type="button" class="upload-button d-inline-block btn-rounded btn btn-success"
+            onclick="launchDropboxPicker();"> Ouvert </button>
+        <br />
+    </div>
+</div>
+<script type="text/javascript" src="https://www.dropbox.com/static/api/2/dropins.js" id="dropboxjs"
+    data-app-key="acip4er3ziwqpt2"></script>
+<script type="text/javascript">
+    function launchDropboxPicker() {
+        let options = {
+
+            // Required. Called when a user selects an item in the Chooser.
+            success: function (files) {
+                let data = {
+                    docs: files,
+                    dir: $('#dir').val(),
+                    compressPdf: $('#compressPdf').val()
+                }
+                let container = $('#dropBox');
+                container.html('<div class="col-md-12 text-center" style="padding: 10px;"><img src="/images/loading.webp"></div>');
+                keepAlive();
+
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    url: "/cloudstorage?provider=dropbox",
+                    contentType: "application/json; charset=utf-8",
+                    success: function (res) {
+                        container.html(res);
+                    },
+                    error: function (err) {
+                        container.html(err.responseText);
+                        console.log(err);
+                    }
+                });
+            },
+
+            // Optional. Called when the user closes the dialog without selecting a file
+            // and does not include any parameters.
+            cancel: function () {
+
+            },
+
+            // Optional. "preview" (default) is a preview link to the document for sharing,
+            // "direct" is an expiring link to download the contents of the file. For more
+            // information about link types, see Link types below.
+            linkType: "direct", // or "direct"
+
+            // Optional. A value of false (default) limits selection to a single file, while
+            // true enables multiple file selection.
+            multiselect: true, // or true
+
+            // Optional. This is a list of file extensions. If specified, the user will
+            // only be able to select files with these extensions. You may also specify
+            // file types, such as "video" or "images" in the list. For more information,
+            // see File types below. By default, all extensions are allowed.
+            //extensions: ['.pdf', '.doc', '.docx'],
+
+            // Optional. A value of false (default) limits selection to files,
+            // while true allows the user to select both folders and files.
+            // You cannot specify `linkType: "direct"` when using `folderselect: true`.
+            folderselect: false, // or true
+
+            // Optional. A limit on the size of each file that may be selected, in bytes.
+            // If specified, the user will only be able to select files with size
+            // less than or equal to this limit.
+            // For the purposes of this option, folders have size zero.
+            //sizeLimit: 1024, // or any positive number
+        };
+        Dropbox.choose(options);
+    }
+</script>

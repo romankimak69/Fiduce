@@ -1,0 +1,274 @@
+<script src="/js/dropzone/dropzone.min.js"></script>
+<link rel="stylesheet" href="/js/dropzone/dropzone.min.css" />
+<h1 class="page-header" style="text-align: center;">Télécharger</h1>
+{{#if errors}}
+{{#each errors}}
+<div class="alert alert-danger">{{msg}}</div>
+{{/each}}
+{{/if}}
+
+<ul class="nav nav-tabs" id="myTab" role="tablist">
+    <li class="nav-item">
+        <a class="nav-link active" id="local-tab" data-toggle="tab" href="#local" role="tab" aria-controls="local"
+            aria-selected="true">Local Computer</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" id="google-drive-tab" data-toggle="tab" href="#googleDrive" role="tab"
+            aria-controls="googleDrive" aria-selected="false">Google Drive</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" id="one-drive-tab" data-toggle="tab" href="#oneDrive" role="tab" aria-controls="oneDrive"
+            aria-selected="false">One Drive</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" id="dropBox-tab" data-toggle="tab" href="#dropBox" role="tab" aria-controls="dropBox"
+            aria-selected="false">Dropbox</a>
+    </li>
+</ul>
+<div class="tab-content" id="myTabContent">
+    <div class="tab-pane fade show active" id="local" role="tabpanel" aria-labelledby="local-tab">
+        <form action="/upload" method="POST" class="dropzone" id="myDropzone" enctype="multipart/form-data">
+            <div class="row-fluid dz-message">
+                <div class="span12 text-center">
+                    Déposez vos fichiers ou dossiers ici ou cliquez pour ouvrir la boîte de dialogue
+                </div>
+            </div>
+            <input type="hidden" name="dir" id="dir" value="{{dir}}">
+            <input type="hidden" name="compressPdf" id="compressPdf" value="{{compressPdf}}">
+        </form>
+        <div class="container">
+            <div class="col-md-12 text-center" style="padding: 10px;">
+                <button type="button" class="d-inline-block btn-rounded btn btn-warning"
+                    onclick="cancelUpload();">Annuler</button>
+                <button type="button" class="upload-button d-inline-block btn-rounded btn btn-success"
+                    onclick="startUpload();" disabled>Télécharger</button>
+            </div>
+        </div>
+    </div>
+    <div class="tab-pane fade" id="googleDrive" role="tabpanel" aria-labelledby="google-drive-tab">
+        <div class="container">
+            <div class="col-md-12 text-center" style="padding: 10px;">
+                <img src="/images/loading.webp">
+            </div>
+        </div>
+    </div>
+    <div class="tab-pane fade" id="oneDrive" role="tabpanel" aria-labelledby="one-drive-tab">
+        <div class="container">
+            <div class="col-md-12 text-center" style="padding: 10px;">
+                <img src="/images/loading.webp">
+            </div>
+        </div>
+    </div>
+    <div class="tab-pane fade" id="dropBox" role="tabpanel" aria-labelledby="dropBox-tab">
+        <div class="container">
+            <div class="col-md-12 text-center" style="padding: 10px;">
+                <img src="/images/loading.webp">
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div id="filePreviewTemplate" hidden>
+    <div class="dz-preview dz-image-preview">
+        <div class="dz-image" style="border: solid 1px black">
+            <img data-dz-thumbnail />
+        </div>
+        <div class="dz-details">
+            <div class="dz-size"><span data-dz-size></span></div>
+            <div class="dz-filename"><span data-dz-name></span></div>
+        </div>
+        <div class="dz-progress"><span class="dz-upload" data-dz-uploadprogress></span></div>
+        <div class="dz-error-message"><span data-dz-errormessage></span></div>
+        <div class="dz-success-mark"><span>✔</span></div>
+        <div class="dz-error-mark"><span>✘</span></div>
+        <div><input type="text" onClick="this.select();" style="width: 120px;margin-top: 10px;" /></div>
+    </div>
+</div>
+</div>
+
+
+
+<style type="text/css">
+    @keyframes upload-button-anim {
+        0% {
+            opacity: 1;
+            transform: scale(1.0);
+        }
+
+        100% {
+            opacity: 0.5;
+            transform: scale(0.95);
+        }
+    }
+
+    .upload-button.busy {
+        animation: upload-button-anim 0.5s ease-in-out infinite alternate;
+        pointer-events: none;
+    }
+</style>
+<script>
+    'use strict'
+    let numberOfFiles = 0;
+    let numberOfUploadedFiles = 0;
+    let myDropzone;
+
+    Dropzone.options.myDropzone = {
+        paramName: "file", // The name that will be used to transfer the file
+        maxFilesize: 128, // MB
+        autoProcessQueue: false,
+        previewTemplate: $('#filePreviewTemplate').html(),
+        addRemoveLinks: true,
+        dictRemoveFile: 'Retirer',
+        dictCancelUpload: 'Annuler',
+        dictCancelUploadConfirmation: 'Voulez-vous vraiment annuler ce téléchargement?',
+        timeout: 36000000,
+        init: function () {
+            myDropzone = this;
+
+            this.on("addedfile", function (file) {
+                if (!file.type.match(/image.*/)) {
+                    // This is not an image, so Dropzone doesn't create a thumbnail.
+                    // Set a default thumbnail:
+                    myDropzone.emit("thumbnail", file, "/images/file.png");
+
+                    // You could of course generate another image yourself here,
+                    // and set it as a data url.
+                }
+
+
+                //console.log(file);
+                let fileName = file.name.split('.').slice(0, -1).join('.');
+                let input = $(file.previewElement).find('input');
+                input.val(fileName);
+                numberOfFiles++;
+                updateUploadButton();
+            });
+
+            this.on("removedfile", function (file) {
+                numberOfFiles--;
+                updateUploadButton();
+            });
+
+            this.on("success", function (file, res) {
+                numberOfUploadedFiles++;
+                if (numberOfUploadedFiles == numberOfFiles) {
+                    console.log("All files uploaded successfully.");
+                }
+                else {
+                    console.log((numberOfFiles - numberOfUploadedFiles) + " file remained to be uploaded");
+                    myDropzone.processQueue();
+                }
+            });
+
+            this.on("queuecomplete", function () {
+                console.log("Queue complete");
+                stopKeepAlive();
+                window.location.href = '/files/' + $("#dir").val();
+            });
+
+            this.on("sending", function (file, xhr, formData) {
+                let input = $(file.previewElement).find('input');
+                let name = input.val();
+                if (!name)
+                    name = file.name;
+                // Will send the filesize along with the file as POST data.
+                formData.append("fileinputname", name);
+            });
+        }
+    };
+
+    function startUpload() {
+        keepAlive();
+        myDropzone.processQueue();
+    }
+
+    function cancelUpload() {
+        stopKeepAlive();
+        if (numberOfUploadedFiles == numberOfFiles)
+            window.history.back();
+        else {
+            if (confirm("Voulez-vous vraiment annuler l'importation?")) {
+                myDropzone.removeAllFiles(true);
+                window.location.href = '/files/' + $("#dir").val();
+            }
+        }
+    }
+
+    function updateUploadButton() {
+        let btn = $('.upload-button');
+        if (numberOfFiles > 0)
+            btn.removeAttr('disabled');
+        else
+            btn.attr('disabled', true);
+    }
+
+    $(document).ready(function () {
+        $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+            e.target // newly activated tab
+            e.relatedTarget // previous active tab
+
+            if (e.target.id == 'google-drive-tab') {
+                refreshDrive('google');
+            } else if (e.target.id == 'one-drive-tab') {
+                refreshDrive('microsoft');
+            } else if (e.target.id == 'dropBox-tab') {
+                refreshDrive('dropbox');
+            }
+        });
+    });
+
+    function refreshDrive(provider) {
+        let url;
+        let container;
+
+        if (provider == 'google') {
+            url = "/cloudstorage?provider=google";
+            container = $('#googleDrive');
+        }
+        else if (provider == 'microsoft') {
+            url = "/cloudstorage/onedrive";
+            container = $('#oneDrive');
+        }
+        else if (provider == 'dropbox') {
+            url = "/cloudstorage/dropbox";
+            container = $('#dropBox');
+        }
+        else return;
+
+        $.ajax({
+            type: "GET",
+            url: url,
+            success: function (res) {
+
+                container.html(res);
+            },
+            error: function (err) {
+                console.log(err);
+            }
+        });
+    }
+
+    let aliveTimer;
+    function keepAlive() {
+        const retryTime = 4 * 60000;
+        aliveTimer = setInterval(function() {
+            $.ajax({
+                type: "GET",
+                url: "/users/checkactive",
+                error: function (err) {
+                    stopKeepAlive();
+                    window.location = "/users/logout";
+                }
+            });
+        }, retryTime);
+    }
+
+    function stopKeepAlive() {
+        clearInterval(aliveTimer);
+    }
+
+
+
+</script>

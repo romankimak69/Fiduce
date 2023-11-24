@@ -1,0 +1,139 @@
+<h1 class="page-header" style="text-align: center;">Tableau de bord</h1>
+{{#ifCond user.accounttype "Agent immobilier"}}
+<hr>
+<div class="col-md-12">
+    <div class="text-center">
+        <button type="button" class="btn btn-rounded btn-secondary" data-toggle="modal" data-target="#modalAddCase"><i
+                class="fa fa-plus"></i> Créer un cas</button>
+    </div>
+</div>
+<form action="" method="POST">
+    <div class="modal text-center fade" id="modalAddCase" tabindex="-1" role="dialog"
+        aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="title">Ajouter un cas</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <textarea name="ss" class="col-12">{{profile.shortstatus}}</textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-success">Créer</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+{{/ifCond}}
+<hr>
+<div class="col-md-12">
+    <div class="text-center">
+        <a class="btn btn-rounded btn-primary" href="/files"><i class="fa fa-file"></i>Documents</a>
+        <a class="btn btn-rounded btn-primary" href="/tokens"><i class="fa fa-hand-holding-usd"></i> Porte-monnaie
+            électonique</a>
+        <a class="btn btn-rounded btn-primary" href="/followup"><i class="fa fa-chalkboard-teacher"></i> Suivre</a>
+        <a class="btn btn-rounded btn-primary" href="/chat"><i class="fa fa-envelope"></i> Chat</a>
+        <a class="btn btn-rounded btn-primary" href="/invoices"><i class="fa fa-money-bill"></i>
+            Remboursement</a>
+    </div>
+</div>
+<hr>
+<div id="recentfiles">
+    <h5>Documents ajoutés récemment: </h5>
+    {{#if files}}
+    <div id="cards">
+        {{#each files}}
+        <div class="card card_shadow" style="width: 14rem; text-align: center;">
+            {{!-- <img class="card-img-top" src="data:image/png;base64,{{baseimg}}"
+                onerror="$(this).attr('src', '/images/{{icon}}.png')" alt="No preview"> --}}
+            {{!-- <img class="card-img-top" src="/files/index/{{id}}"
+                onerror="$(this).attr('src', '/images/{{icon}}.png')" alt="No preview"> --}}
+
+            {{#startsWith mimetype "image"}}
+            <img class="card-img-top" src="/files/index/{{id}}" alt="No available preview" />
+            {{else}}
+            <img class="card-img-top" src="/images/{{icon}}.png" />
+            {{/startsWith}}
+            <!-- <img class="card-img-top" src="/images/{{extension}}.png{{base64}}"> -->
+            <div class="card-body">
+                <br>
+                <h5 class="card-title dashboard-card-title">{{name}}.{{extension}}</h5>
+                <hr>
+                <div class="btn-group dashboard-card-button">
+                    <a href="#" class="btn btn-dark"
+                        onclick="openModal('{{name}}.{{extension}}', '{{id}}', '{{mimetype}}')">Ouvrir dans
+                        un nouvel onglet</a>
+                </div>
+            </div>
+            {{!-- <div class="modal fade" id="modal{{id}}" tabindex="-1" role="dialog"
+                aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="title">Êtes-vous sûr?</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            Vous êtes sur le point de supprimer le fichier:<br> <b>{{name}}.{{extension}}</b>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                            <a href="/files/index/{{id}}?delete=true" class="btn btn-danger">Je suis sûr.
+                                Supprime-le.</a>
+                        </div>
+                    </div>
+                </div>
+            </div> --}}
+
+        </div>
+        {{/each}}
+    </div>
+    {{/if}}
+</div>
+
+<div class="modal fade" id="modalPreview" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 80%;" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="title"></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" style="height: 1px; text-align: center;">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script type="text/javascript">
+    function openModal(name, id, mimetype) {
+        let modal = $('#modalPreview');
+        let src = '/files/index/' + id;
+        modal.find('.modal-content').css('height', window.innerHeight - 100);
+        modal.find('#title').text(name);
+        let modalBody = modal.find('.modal-body');
+
+        if (mimetype.startsWith('image')) {
+            modalBody.css('overflow-x', 'hidden');
+            let img = $('<img/>').attr('src', src);
+            modalBody.html(img);
+        } else {
+            modalBody.css('overflow-x', 'unset');
+            let iframe = $('<iframe/>').attr('height', '100%').attr('width', '100%').attr('src', src);
+            modalBody.html(iframe);
+        }
+        modal.modal('show');
+    }
+</script>

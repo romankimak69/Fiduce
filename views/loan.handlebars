@@ -1,0 +1,70 @@
+{{#if loan}}
+<h1 class="page-header" style="text-align: center;">{{loan.name}}</h1>
+<form action="" method="POST"> 
+    <div class="modal text-center fade" id="modalReport" tabindex="-1" role="dialog" aria-labelledby="modalReport" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="title">Ajouter un rapport</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div id="txbody" class="modal-body">
+                        <textarea name="report" class="col"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                    <button type="submit" id="sendTx" class="btn btn-success">Ajouter</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<div class="container">
+    <div class="row">
+        <h4><b>Information:</b></h4>
+    </div>
+    <br>
+    <div class="row">
+        Courtier: &nbsp; <b>{{loan.broker}}</b>
+    </div>
+    <div class="row">
+        Adresse: &nbsp; <b>{{loan.address}}</b>
+    </div>
+    <div class="row">
+        Description: &nbsp; <b>{{loan.description}}</b>
+    </div>
+    <div class="row">
+        Statut actuel: &nbsp; <b>{{loan.currentstatus}}</b>
+    </div>
+    <br>
+    <div class="row">
+        <h4><b>Rapports:</b>&nbsp;<button class="add_file btn btn-rounded btn-primary" data-toggle="modal" data-target="#modalReport"><i class="fa fa-plus"></i> Ajouter un rapport</button></h4>
+    </div>
+    <br>
+    <div class="row">
+    {{#if reports}}
+    {{#each reports}}
+    <div class="card card_shadow" style="width: 20rem; text-align: center;">
+        <div class="card-header">
+           {{owner}}
+        </div>
+        <div class="card-body">
+            <h5 class="card-title">{{report}}</h5>
+        </div>
+        <div class="card-footer text-muted">
+            {{date}}
+        </div>
+    </div>
+    {{/each}}
+    {{else}}
+    <div class="text-center">
+        <span>Vous n'avez actuellement aucun rapport.</span>
+    </div>
+    {{/if}}
+    </div>
+</div>
+{{else}}
+<h1 class="page-header" style="text-align: center;">Vous n'avez pas accès</h1>
+{{/if}}

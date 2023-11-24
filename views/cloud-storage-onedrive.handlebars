@@ -1,0 +1,59 @@
+{{#if errors}}
+{{#each errors}}
+<div class="alert alert-danger">{{msg}}</div>
+{{/each}}
+{{/if}}
+<div class="container">
+    <div class="col-md-12 text-center" style="padding: 10px;">
+        <br />
+        <br />
+        <br />
+        <h4>Téléchargez des fichiers depuis onedrive.</h4>
+        <br />
+        <br />
+        <button type="button" class="upload-button d-inline-block btn-rounded btn btn-success"
+            onclick="launchOneDrivePicker();"> Ouvert </button>
+        <br />
+    </div>
+</div>
+<script type="text/javascript" src="https://js.live.net/v7.0/OneDrive.js"></script>
+<script type="text/javascript">
+    function launchOneDrivePicker() {
+        var odOptions = {
+            clientId: "78f45b88-b5f2-4419-a7d0-d7eeeba86480",
+            action: "download",
+            viewType: 'all',
+            multiSelect: true,
+            advanced: {
+                redirectUri: window.location.origin + "/cloudstorage/onedrive"
+            },
+            success: function (files) {
+                let data = {
+                    docs: files,
+                    dir: $('#dir').val(),
+                    compressPdf: $('#compressPdf').val()
+                }
+                let container = $('#oneDrive');
+                container.html('<div class="col-md-12 text-center" style="padding: 10px;"><img src="/images/loading.webp"></div>');
+                keepAlive();
+
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    url: "/cloudstorage?provider=microsoft",
+                    contentType: "application/json; charset=utf-8",
+                    success: function (res) {
+                        container.html(res);
+                    },
+                    error: function (err) {
+                        container.html(err.responseText);
+                        console.log(err);
+                    }
+                });
+            },
+            cancel: function () { /* cancel handler */ },
+            error: function (error) { /* error handler */ }
+        };
+        OneDrive.open(odOptions);
+    }
+</script>

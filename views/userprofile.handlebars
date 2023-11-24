@@ -1,0 +1,112 @@
+<a class="col-md-4 centered profileimg" style="background-image: url({{#if profile.image}}{{profile.image}}{{else}}/profileimg/user.png{{/if}});"></a>
+<h1 class="page-header" style="text-align: center;">{{profile.name}}</h1>
+<h5 style="margin-top: -30px; text-align: center;"><b>{{profile.accounttype}}</b></h5>
+<input type="hidden" id="stars" value="{{profile.rating}}">
+<h4 style="text-align: center;">
+    <i class="fa fa-star"></i>
+    <i class="fa fa-star"></i>
+    <i class="fa fa-star"></i>
+    <i class="fa fa-star"></i>
+    <i class="fa fa-star"></i>
+    {{#unless profile.rating}}
+        - Pas de notes
+    {{/unless}}
+</h4>
+{{#unless ismine}}
+    {{#descShow profile.accounttype}}
+        <div class="col-md-12">
+        <b>Statut court:</b>{{#if ismine}}&nbsp;&nbsp;<button type="button" class="badge-pill btn-primary btn btn-sm" data-toggle="modal" data-target="#modalSS"><i class="fa fa-edit"></i> Éditer</button>{{/if}}
+        <br>
+        <br>
+            {{#if profile.shortstatus}}
+                {{profile.shortstatus}}
+            {{else}}
+                Cet utilisateur n'a pas encore défini son statut court.
+            {{/if}}
+        </div>
+        <br>
+        <div class="col-md-12">
+        <b>Description:</b>{{#if ismine}}&nbsp;&nbsp;<button type="button" class="badge-pill btn-primary btn btn-sm" data-toggle="modal" data-target="#modalDesc"><i class="fa fa-edit"></i> Éditer</button>{{/if}}
+        <br>
+        <br>    
+            {{#if profile.description}}
+                {{profile.description}}
+            {{else}}
+                Cet utilisateur n'a pas encore défini sa description.
+            {{/if}}
+        </div>
+    {{/descShow}}
+{{/unless}}
+{{#if ismine}}
+<div class="col-md-12">
+   <b>Statut court:</b>{{#if ismine}}&nbsp;&nbsp;<button type="button" class="badge-pill btn-primary btn btn-sm" data-toggle="modal" data-target="#modalSS"><i class="fa fa-edit"></i> Éditer</button>{{/if}}
+   <br>
+   <br>
+    {{#if profile.shortstatus}}
+        {{profile.shortstatus}}
+    {{else}}
+        Cet utilisateur n'a pas encore défini son statut court.
+    {{/if}}
+</div>
+<br>
+<div class="col-md-12">
+   <b>Description:</b>{{#if ismine}}&nbsp;&nbsp;<button type="button" class="badge-pill btn-primary btn btn-sm" data-toggle="modal" data-target="#modalDesc"><i class="fa fa-edit"></i> Éditer</button>{{/if}}
+   <br>
+   <br>    
+    {{#if profile.description}}
+        {{profile.description}}
+    {{else}}
+        Cet utilisateur n'a pas encore défini sa description.
+    {{/if}}
+</div>
+<form action="" method="POST">
+    <div class="modal text-center fade" id="modalSS" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="title">Modifier votre statut abrégé</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <textarea name="ss" class="col-12">{{profile.shortstatus}}</textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-success">Enregistrer</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<form action="" method="POST">
+    <div class="modal text-center fade" id="modalDesc" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="title">Modifier votre description</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <textarea name="desc" class="col-12">{{profile.description}}</textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-success">Enregistrer</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+{{/if}}
+<script>
+    function resize(){
+        $(".profileimg").height($(".profileimg").width());
+        $("i.fa-star:lt(" + Math.floor($("#stars").val() / 20) + ")").addClass("star");
+    }
+    resize();
+    window.addEventListener("resize", resize);
+</script>

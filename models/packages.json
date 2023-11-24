@@ -1,0 +1,17 @@
+[
+  {
+    "amountCents": 50,
+    "percent": 7,
+    "currency": "eur"
+  },
+  {
+    "amountCents": 1000001,
+    "percent": 10,
+    "currency": "eur"
+  },
+  {
+    "amountCents": 5000001,
+    "percent": 13,
+    "currency": "eur"
+  }
+]

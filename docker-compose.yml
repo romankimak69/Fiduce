@@ -1,0 +1,26 @@
+version: "3.6"
+services:
+    mongo:
+        image: mongo:latest
+        entrypoint: ["mongod", "--bind_ip", "0.0.0.0"]
+        ports:
+        - "27017:27017"
+
+        volumes:
+        - db_data:/data/db
+
+    node:
+        depends_on:
+        - mongo
+
+        environment:
+            MONGO_HOST: "mongo"
+
+        build:
+            context: .
+
+        ports:
+        - "8080:3000"
+
+volumes:
+    db_data:

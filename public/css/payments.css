@@ -1,0 +1,70 @@
+
+button,
+#submit {
+    color: #fff;
+    background-color: #007bff;
+    border-color: #007bff;
+    border-radius: 4px;
+    margin: 5px;
+    cursor: pointer;
+    min-width: 130px;
+    margin-left: 0;
+}
+
+.hidden {
+    display: none
+}
+
+.input-container {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.payment-inputs {
+    width: 100%
+}
+
+h1 {
+    text-align: center;
+}
+
+.payment-element {
+    height: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-bottom: 1rem
+}
+
+.card-creds {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-creds .form-group {
+    flex-basis: 45%;
+}
+
+#payment-message.ok {
+    color: #05b2b0
+}
+
+#payment-message.error {
+    color: #e70b0b;
+}
+
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+    -moz-appearance: textfield;
+}

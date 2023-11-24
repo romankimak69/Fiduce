@@ -1,0 +1,122 @@
+<h1 class="page-header" style="text-align: center;">Messagerie instantanée</h1>
+<hr>
+<div class="col-md-12">
+<div class="text-center">
+    <button type="button" class="btn btn-rounded btn-primary" data-toggle="modal" data-target="#modalAdd"><i class="fa fa-plus"></i> Créer un chat</button>
+    <button type="button" class="btn btn-rounded btn-primary" data-toggle="modal" data-target="#modalAddGroup"><i class="fa fa-plus"></i> Créer un groupe de chat</button>
+</div>
+</div>
+{{#if chats}}
+<hr>
+<br>
+{{/if}}
+                        <div class="modal fade" id="modalAdd" tabindex="-1" role="dialog" aria-labelledby="modalAdd" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered" role="document">
+                                        <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="title">Ajouter un contact au chat</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body text-center">
+                                            <div id="addBTN" class="btn-group btn-group-toggle" data-toggle="buttons">
+                                                <label class="btn btn-secondary active">
+                                                    <input type="radio" name="options" id="option1" autocomplete="off" checked><i class="fa fa-envelope"></i> Mail
+                                                </label>
+                                                <label class="btn btn-secondary">
+                                                    <input type="radio" name="options" id="option2" autocomplete="off"><i class="fa fa-user"></i> Nom d'utilisateur
+                                                </label>
+                                            </div>
+                                            <div class="col-md-8 col-centered mt-3 mb-5">
+                                                <form class="form-group input-group">
+                                                <input id="email1" type="text" class="border-primary form-control" name="email" placeholder="Mail:" aria-label="Mail:">
+                                                <div class="input-group-append">
+                                                    <button type="submit" class="btn btn-primary"><i class="fa fa-plus"></i> Ajouter</button>
+                                                </form></div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                                        </div>
+                                        </div>
+                                    </div>
+                                </div> 
+                                <div class="modal fade" id="modalAddGroup" tabindex="-1" role="dialog" aria-labelledby="modalAddGroup" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered" role="document">
+                                        <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="title">Ajouter des utilisateurs à la discussion de groupe</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body text-center">
+                                            <div id='addBTNGRP' class="btn-group btn-group-toggle" data-toggle="buttons">
+                                                <label class="btn btn-secondary active">
+                                                    <input type="radio" name="options" id="option3" autocomplete="off" checked><i class="fa fa-envelope"></i> Mail
+                                                </label>
+                                                <label class="btn btn-secondary">
+                                                    <input type="radio" name="options" id="option4" autocomplete="off"><i class="fa fa-user"></i> Nom d'utilisateur
+                                                </label>
+                                            </div>
+                                            <div class="col-md-8 col-centered mt-3 mb-5">
+                                                <form method="POST" action="/chat/multi/" class="form-group input-group">
+                                                <input id="email2" type="text" class="border-primary form-control" name="email" placeholder="Mail:" aria-label="Mail:">
+                                                <div class="input-group-append">
+                                                    <button type="submit" class="btn btn-primary"><i class="fa fa-plus"></i> Ajouter</button>
+                                                </form></div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                                        </div>
+                                        </div>
+                                    </div>
+                                </div>  
+{{#if chats}}
+<div class="list-group col-md-8 col-centered">
+            {{#if multi}}
+                    {{#each multi}}
+                        <a href="/chat/multi/{{id}}" class="list-group-item d-flex justify-content-between align-items-center">
+                            <img style="position: absolute;" src="/images/multichat.svg">
+                            <span style="padding: 20px 0px 20px 60px;">{{name}}</span>
+                        </a>
+                    {{/each}}
+            {{/if}}
+        {{#each chats}}
+            <a href="/chat/user/{{id}}" class="list-group-item d-flex justify-content-between align-items-center">
+                <img style="position: absolute;" src="/images/user_default.svg">
+                <span style="padding: 20px 0px 20px 60px;">{{username}}</span>
+                {{#unless seen}}
+                    <span class="badge badge-primary badge-pill">Nouveau message</span>
+                {{/unless}}
+            </a>
+        {{/each}}
+
+</div>
+{{/if}}
+<script>
+    $(document).ready(function() {
+    $('#addBTN > label').click(function() {
+        if ($('#option2').is(':checked')) {
+            $("#email1").attr({"name": "email"});
+            $("#email1").attr({"placeholder": "Mail: "});
+        }
+        else{
+            $("#email1").attr({"name": "username"});
+            $("#email1").attr({"placeholder": "Nom d'utilisateur: "});
+        }
+    });
+    $('#addBTNGRP > label').click(function() {
+        if ($('#option4').is(':checked')) {
+            $("#email2").attr({"name": "email"});
+            $("#email2").attr({"placeholder": "Mail: "});
+        }
+        else{
+            $("#email2").attr({"name": "username"});
+            $("#email2").attr({"placeholder": "Nom d'utilisateur: "});
+        }
+    });
+});
+</script>

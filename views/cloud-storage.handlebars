@@ -1,0 +1,157 @@
+{{#if errors}}
+{{#each errors}}
+<div class="alert alert-danger">{{msg}}</div>
+{{/each}}
+{{/if}}
+{{#if authUrl}}
+<div class="container">
+    <div class="col-md-12 text-center" style="padding: 10px;">
+        <br />
+        <h4>Veuillez cliquer sur le bouton pour autoriser votre Google Drive.</h4>
+        <br />
+        <button type="button" class="upload-button d-inline-block btn-rounded btn btn-success"
+            onclick="authoriz('{{authUrl}}');">Autoriser Google Drive</button>
+        <br />
+    </div>
+</div>
+
+<script>
+    function authoriz(url) {
+        let w = window.open(url, '_blank');
+        let wTick = setInterval(function () {
+            if (w.closed) {
+                clearInterval(wTick);
+                console.log('window closed!');
+                refreshDrive('google');
+            }
+        }, 500);
+    }
+</script>
+{{/if}}
+{{#if authorized}}
+<div class="container">
+    <div class="col-md-12 text-center" style="padding: 10px;">
+        <br />
+        <br />
+        <br />
+        <h4>Votre compte a été autorisé. Veuillez fermer cette page pour continuer.</h4>
+        <br />
+        <br />
+        <button type="button" class="upload-button d-inline-block btn-rounded btn btn-success"
+            onclick="window.close();"> Proche </button>
+        <br />
+    </div>
+</div>
+{{/if}}
+{{#if token}}
+<div class="container">
+    <div class="col-md-12 text-center" style="padding: 10px;">
+        <br />
+        <br />
+        <button type="button" class="upload-button d-inline-block btn-rounded btn btn-success"
+            onclick="loadPicker();">Sélectionnez les Fichiers</button>
+        <br />
+        <br />
+    </div>
+</div>
+<script>
+    let developerKey = '{{API_KEY}}';
+    let clientId = '{{client_id}}'
+    let appId = "{{project_id}}";
+    let oauthToken = "{{token.access_token}}"
+    let scope = ['https://www.googleapis.com/auth/drive.readonly', 'https://www.googleapis.com/auth/drive.metadata.readonly'];
+    let pickerApiLoaded = false;
+
+    // Use the Google API Loader script to load the google.picker script.
+    function loadPicker() {
+        //gapi.load('auth', {'callback': onAuthApiLoad});
+        gapi.load('picker', { 'callback': onPickerApiLoad });
+    }
+
+    //function onAuthApiLoad() {
+    //  window.gapi.auth.authorize(
+    //      {
+    //        'client_id': clientId,
+    //        'scope': scope,
+    //        'immediate': false
+    //      },
+    //      handleAuthResult);
+    //}
+
+    function onPickerApiLoad() {
+        pickerApiLoaded = true;
+        createPicker();
+    }
+    //function handleAuthResult(authResult) {
+    //  if (authResult && !authResult.error) {
+    //    oauthToken = authResult.access_token;
+    //    createPicker();
+    //  }
+    //}
+
+    // Create and render a Picker object for searching images.
+    function createPicker() {
+        if (pickerApiLoaded && oauthToken) {
+            let view = new google.picker.View(google.picker.ViewId.DOCS);
+            let picker = new google.picker.PickerBuilder()
+                .enableFeature(google.picker.Feature.NAV_HIDDEN)
+                .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
+                .setLocale('fr')
+                .setAppId(appId)
+                .setOAuthToken(oauthToken)
+                .addView(view)
+                .addView(new google.picker.DocsUploadView())
+                .setDeveloperKey(developerKey)
+                .setCallback(pickerCallback)
+                .build();
+            picker.setVisible(true);
+        }
+    }
+
+    // A simple callback implementation.
+    function pickerCallback(res) {
+        if (res.action == google.picker.Action.PICKED) {
+            let data = {
+                docs: res.docs,
+                dir: $('#dir').val(),
+                compressPdf: $('#compressPdf').val()
+            }
+            let container = $('#googleDrive');
+            container.html('<div class="col-md-12 text-center" style="padding: 10px;"><img src="/images/loading.webp"></div>');
+            keepAlive();
+
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify(data),
+                url: "/cloudstorage?provider=google",
+                contentType: "application/json; charset=utf-8",
+                success: function (res) {
+
+                    container.html(res);
+                },
+                error: function (err) {
+                    container.html(err.responseText);
+                    console.log(err);
+                }
+            });
+        }
+    }
+</script>
+<script type="text/javascript" src="https://apis.google.com/js/api.js"></script>
+{{/if}}
+{{#if uploadFinished}}
+<div class="container">
+    <div class="col-md-12 text-center" style="padding: 10px;">
+        <br />
+        <br />
+        <span>Tous les fichiers sont téléchargés avec succès.</span>
+        <br />
+        <br />
+    </div>
+</div>
+<script>
+    setTimeout(function () {
+        window.location.href = '/files/' + $("#dir").val();
+    }, 1000);
+</script>
+{{/if}}

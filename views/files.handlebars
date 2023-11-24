@@ -1,0 +1,1224 @@
+<h1 class="page-header" style="text-align: center;">Documents</h1>
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item text-primary"><a>Documents</a></li>
+        {{#if search}}
+            <li class="breadcrumb-item active" aria-current="page"><a href="/files">Le dossier de {{user.name}}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Rechercher : "{{search}}"</li>
+        {{/if}}
+        {{#unless search}}
+            {{#each parents}}
+                <li class="breadcrumb-item active" aria-current="page"><a href="/files/{{id}}">{{name}}</a></li>
+            {{/each}}
+        {{!-- {{#if dir}}
+        <li class="breadcrumb-item active" aria-current="page"><a href="/files">Le dossier de {{user.name}}</a></li>
+        {{#if dir.parent}}
+        <li class="breadcrumb-item active" aria-current="page">...</li>
+        <li class="breadcrumb-item active" aria-current="page">{{dir.name}}</li>
+        {{/if}}
+        {{#unless dir.parent}}
+        <li class="breadcrumb-item active" aria-current="page">{{dir.name}}</li>
+        {{/unless}}
+        {{/if}}
+        {{#unless dir}}
+        <li class="breadcrumb-item active" aria-current="page">Le dossier de {{user.name}}</li>
+        {{/unless}} --}}
+        {{/unless}}
+    </ol>
+</nav>
+
+{{!-- Serach bar --}}
+<form action="" method="GET">
+    <div class="input-group mb-3 col-8 col-centered">
+        <div class="input-group-prepend">
+            <span class="input-group-text" id="basic-addon1"><i class="fa fa-search"></i></span>
+        </div>
+        <input type="text" class="form-control" placeholder="Rechercher : " aria-label="Rechercher : " name="search"
+               id="search" aria-describedby="basic-addon1">
+        <div class="input-group-append">
+            <button class="btn btn-secondary" type="submit">Rechercher</button>
+        </div>
+    </div>
+</form>
+
+{{!-- Top Bar Buttons --}}
+<div class="text-center" style="z-index: 2; position: relative;">
+    {{#if dir}}
+        <input type="hidden" id="dirVal" value="{{dir.id}}">
+        <a class="add_file btn btn-rounded btn-primary" href="/upload?dir={{dir.id}}&compressPdf={{compressPdf}}"
+        title="Ajouter un Fichier"><i class="fa fa-plus"></i></a>
+    {{/if}}
+    {{#unless dir}}
+        <input type="hidden" id="dirVal" value="">
+        <a class="add_file btn btn-rounded btn-primary" href="/upload" title="Ajouter un Fichier"><i
+                class="fa fa-plus"></i></a>
+    {{/unless}}
+    <button class="add_file btn btn-rounded btn-primary" type="button" data-toggle="modal" data-target="#modalNewFolder"
+            title="Créer un Dossier"><i class="fa fa-folder-plus"></i></button>
+    <button class="add_file btn btn-rounded btn-dark" onclick="selectAll($(this));" title="Tout Sélectionner"><i
+            class="fa fa-check-circle"></i></button>
+    <button class="add_file btn btn-rounded btn-dark" onclick="copyAll();" title="Copier"><i
+            class="fa fa-copy"></i></button>
+    <button class="add_file btn btn-rounded btn-dark" onclick="moveAll();" title="Déplacer"><i
+            class="fa fa-cut"></i></button>
+    <button class="add_file btn btn-rounded btn-dark" onclick="pasteAll();" title="Coller"><i
+            class="fa fa-paste"></i></button>
+    <button class="add_file btn btn-rounded btn-danger" data-toggle="modal" data-target="#modalDeleteAll"
+            title="Effacer"><i class="fa fa-trash"></i></button>
+    <button class="add_file btn btn-rounded btn-success" data-toggle="modal" data-target="#modalDeletedFiles"
+            title="Restaurer"><i class="fa fa-recycle"></i></button>
+    <button class="add_file btn btn-rounded btn-dark" data-toggle="modal" data-target="#modalSendByEmail"
+            title="Envoyé par Email" onclick="fillEmailAttachments();"><i class="fa fa-share-square"></i></button>
+    <div class="btn-group">
+        <button type="button" class="btn btn-rounded btn-secondary dropdown-toggle" data-toggle="dropdown"
+                aria-haspopup="true" aria-expanded="false">
+            <i class="fa fa-sort"></i>
+        </button>
+        <div class="dropdown-menu">
+            <h6 class="dropdown-header">Ordre croissant:</h6>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="?sort=date"><i class="fa fa-clock"></i> Dater</a>
+            <a class="dropdown-item" href="?sort=type"><i class="fa fa-file"></i> Type</a>
+            <a class="dropdown-item" href="?sort=size"><i class="fa fa-expand"></i> Taille</a>
+            <div class="dropdown-divider"></div>
+            <h6 class="dropdown-header">Trier par:</h6>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="?sort=daterev"><i class="fa fa-clock"></i> Dater</a>
+            <a class="dropdown-item" href="?sort=typerev"><i class="fa fa-file"></i> Type</a>
+            <a class="dropdown-item" href="?sort=sizerev"><i class="fa fa-expand"></i> Taille</a>
+        </div>
+    </div>
+    <div class="btn-group">
+        <button type="button" class="btn-rounded btn btn-secondary dropdown-toggle" data-toggle="dropdown"
+                aria-haspopup="true" aria-expanded="false">
+            <i class="fa fa-list-ul"></i>
+        </button>
+        <div class="dropdown-menu">
+            <h6 class="dropdown-header">Afficher:</h6>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="?grid=true"><i class="fa fa-th"></i> Icône</a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="?grid=false"><i class="fa fa-list-ul"></i> Liste</a>
+        </div>
+    </div>
+</div>
+
+<br>
+
+{{!-- Files and Folders --}}
+{{#if grid}}
+    <div id="cards">
+        {{#each dirs}}
+            <div class="card card_shadow" style="width: 14rem; text-align: center;" draggable="true">
+                <img class="card-img-top" src="/images/folder.png" alt="No available preview">
+                <!-- <img class="card-img-top" src="/images/{{extension}}.png{{base64}}"> -->
+                <div class="card-body">
+                    <br>
+                    <h5 class="card-title">{{name}}</h5>
+                    <hr>
+                    <div class="btn-group">
+                        <a href="/files/{{id}}" class="btn btn-secondary">Naviguer</a>
+                        <input type="hidden" id="id" name="id" value="{{id}}">
+                        {{#if deletable}}
+                            <button type="button" class="btn btn-dark dropdown-toggle dropdown-toggle-split"
+                                    data-toggle="dropdown"
+                                    aria-haspopup="true" aria-expanded="false">
+                                <span class="sr-only">Basculer la liste déroulante</span>
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <h6 class="dropdown-header">Options:</h6>
+                                <div class="dropdown-divider"></div>
+                                <button class="file-rename dropdown-item" onclick="renameGrid(this);"><i
+                                        class="fa fa-edit"></i>
+                                    Renommer
+                                </button>
+                                <div class="dropdown-divider"></div>
+                                <button type="button" class="text-danger dropdown-item"
+                                        onclick="confirmDelete('{{name}}','{{id}}', '/files/{{id}}?delete=true');"><i
+                                        class="fa fa-trash"></i> Effacer
+                                </button>
+                            </div>
+                        {{else}}
+                            <input type="hidden" id="notDeletable" name="notDeletable" value="true"/>
+                        {{/if}}
+                    </div>
+                </div>
+            </div>
+        {{/each}}
+        {{#each files}}
+            <div class="card card_shadow" style="width: 14rem; text-align: center;" draggable="true">
+                {{!-- <img class="card-img-top" src="data:image/png;base64,{{baseimg}}"
+                            onerror="$(this).attr('src', '/images/{{icon}}.png')" alt="No available preview"> --}}
+                {{#startsWith mimetype "image"}}
+                    <img class="card-img-top" src="/files/index/{{id}}" alt="No available preview"/>
+                {{else}}
+                    <img class="card-img-top" src="/images/{{icon}}.png"/>
+                {{/startsWith}}
+                {{!-- <img class="card-img-top" src="/files/index/{{id}}"
+                    onerror="$(this).attr('src', '/images/{{icon}}.png')" alt="No available preview"> --}}
+                <!-- <img class="card-img-top" src="/images/{{extension}}.png{{base64}}"> -->
+                <div class="card-body">
+                    <br>
+                    <h5 class="card-title dashboard-card-title">{{name}}.{{extension}}</h5>
+                    <hr>
+                    {{#if signed}}<span class="badge badge-primary badge-pill">signé</span>
+                        <hr>
+                    {{/if}}
+                    <div class="btn-group dashboard-card-button-inline">
+                        <a href="#" onclick="openModal('{{name}}.{{extension}}', '{{id}}', '{{mimetype}}')"
+                           class="btn btn-secondary">Ouvrir dans un nouvel onglet</a>
+                        <button type="button" class="btn btn-dark dropdown-toggle dropdown-toggle-split"
+                                data-toggle="dropdown"
+                                aria-haspopup="true" aria-expanded="false">
+                            <span class="sr-only">Basculer la liste déroulante</span>
+                        </button>
+                        <input type="hidden" id="id" name="id" value="{{id}}">
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            <h6 class="dropdown-header">Options:</h6>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="/files/index/{{id}}?download=true"><i
+                                    class="fa fa-download"></i>
+                                Télécharger</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="#"><i class="fa fa-share"></i> Partager</a>
+                            <div class="dropdown-divider"></div>
+                            {{#if canConvertToPdf}}
+                                <a class="dropdown-item" href="#" onclick="convertToPdf('{{id}}');"><i
+                                        class="fa fa-file-pdf"></i>
+                                    Convertir en pdf</a>
+                                <div class="dropdown-divider"></div>
+                            {{/if}}
+                            <a class="dropdown-item" href="/files/index/{{id}}?sign=true"><i
+                                    class="fa fa-pen-square"></i>
+                                E-signe</a>
+                            <div class="dropdown-divider"></div>
+                            <button class="file-rename dropdown-item" onclick="renameGrid(this);"><i
+                                    class="fa fa-edit"></i>
+                                Renommer
+                            </button>
+                            <div class="dropdown-divider"></div>
+                            <!--<a href="/files/index/{{id}}?ocr=true" class="text-info dropdown-item">OCR test</a>
+                                            <div class="dropdown-divider"></div>-->
+                            <button type="button" class="text-danger dropdown-item"
+                                    onclick="confirmDelete('{{name}}.{{extension}}','{{id}}', '/files/index/{{id}}?delete=true&dir=
+                                        {{dir.id}}
+                                            ');"><i
+                                    class="fa fa-trash"></i> Effacer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {{/each}}
+    </div>
+{{/if}}
+{{#unless grid}}
+    <div id="files-top" class="list-group row col-md-10 col-centered">
+        <div class="list-group-item d-flex sticky-top">
+            <div class="col-8"><span>Nom :</span></div>
+            <div class="col-4 text-right"><span>Options :</span></div>
+        </div>
+        {{#each dirs}}
+            <div style="cursor: pointer;" data-folder="true"
+                 class="itemonlist list-group-item-action list-group-item d-flex"
+                 draggable="true">
+                <input type="hidden" id="id" name="id" value="{{id}}"/>
+
+                {{#if deletable}}
+                    <div class="d-none col-1 child-element" id="selectbtn">
+                        <button class="select btn btn-outline-primary btn-circle" type="button"
+                                onclick="select($(this));">
+                            <i class="fa"></i>
+                            <input class="hash" type="hidden" value="{{id}}">
+                            <input class="type" type="hidden" value="folder">
+                            <input class="name" type="hidden" value="{{name}}">
+                        </button>
+                    </div>
+                {{else}}
+                    <input type="hidden" id="notDeletable" name="notDeletable" value="true"/>
+                {{/if}}
+                <div onclick="location.href='/files/{{id}}'" class="col-1 child-element" style="min-width: 50px;">
+                    <span class="file-img" style="background-image: url(/images/folder.png);"></span>
+                </div>
+                <div onclick="location.href='/files/{{id}}'" class="col-7 child-element">
+                    <span class="file-name">{{name}}</span>
+                </div>
+                {{#if deletable}}
+                    <input type="hidden" id="id" name="id" value="{{id}}">
+                    <div class="col-4 btn-group flex-row-reverse col-4">
+                        <div class="dropdown">
+                            <button class="align-middle btn btn-dark btn-circle" type="button" id="dropdownMenuButton"
+                                    data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">
+                                <i class="fa fa-bars"></i>
+                            </button>
+                            {{!-- <button class="align-middle select btn btn-outline-primary d-none btn-circle" type="button"
+                                            onclick="select($(this));">
+                                            <i class="fa"></i>
+                                            <input class="hash" type="hidden" value="{{id}}">
+                                            <input class="type" type="hidden" value="folder">
+                                            <input class="name" type="hidden" value="{{name}}">
+                                        </button> --}}
+                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <h4 class="dropdown-header">Options:</h4>
+                                <div class="dropdown-divider"></div>
+                                <button class="file-rename dropdown-item" onclick="renameList(this);"><i
+                                        class="fa fa-edit"></i>
+                                    Renommer
+                                </button>
+                                <div class="dropdown-divider"></div>
+                                <button type="button" class="text-danger dropdown-item"
+                                        onclick="confirmDelete('{{name}}','{{id}}', '/files/{{id}}?delete=true');"><i
+                                        class="fa fa-trash"></i> Effacer
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                {{/if}}
+            </div>
+        {{/each}}
+        {{#each files as |file|}}
+            <div value="{{file.size}}" style="cursor: pointer;"
+                 class="itemonlist list-group-item-action list-group-item d-flex"
+                 draggable="true">
+                <div class="d-none col-1 col-xs-2" id="selectbtn">
+                    <button class="select btn btn-outline-primary btn-circle" type="button" onclick="select($(this));">
+                        <i class="fa"></i>
+                        <input class="hash" type="hidden" value="{{id}}">
+                        <input class="type" type="hidden" value="file">
+                        <input class="name" type="hidden" value="{{name}}.{{extension}}">
+                    </button>
+
+                </div>
+                <div class="col-1 col-xs-2 child-element" style="min-width: 50px;"
+                     onclick="openModal('{{name}}.{{extension}}', '{{id}}', '{{mimetype}}')">
+                    {{#startsWith mimetype "image"}}
+                        <img class="file-img" src="/files/index/{{id}}"/>
+                    {{else}}
+                        <img class="file-img" src="/images/{{icon}}.png"/>
+                    {{/startsWith}}
+                </div>
+                <div class="col-7 col-xs-5 child-element"
+                     onclick="openModal('{{name}}.{{extension}}', '{{id}}', '{{mimetype}}')">
+                    <span class="file-name">{{name}}.{{extension}}</span>
+                    {{#if signed}}
+                        <span class="badge badge-primary badge-pill">signé</span>
+                    {{/if}}
+                </div>
+
+                {{!-- Drop down Options --}}
+                <div class="btn-group flex-row-reverse col-4">
+                    <div class="dropdown">
+                        <button class="align-middle btn btn-dark btn-circle" type="button" id="dropdownMenuButton"
+                                data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <input type="hidden" id="id" name="id" value="{{id}}">
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            <h6 class="dropdown-header">Options:</h6>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="/files/index/{{id}}?download=true"><i
+                                    class="fa fa-download"></i>
+                                Télécharger</a>
+                            <div class="dropdown-divider"></div>
+                            <button type="button" class="dropdown-item" onclick="setShare('{{id}}');"><i
+                                    class="fa fa-share"></i> Partager
+                            </button>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="/files/index/{{id}}?sign=true"><i
+                                    class="fa fa-pen-square"></i>
+                                E-signe</a>
+                            {{#if canConvertToPdf}}
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="#" onclick="convertToPdf('{{id}}');"><i
+                                        class="fa fa-file-pdf"></i>
+                                    Convertir en pdf</a>
+                            {{/if}}
+                            <div class="dropdown-divider"></div>
+                            <button class="file-rename dropdown-item" onclick="renameList(this);"><i
+                                    class="fa fa-edit"></i>
+                                Renommer
+                            </button>
+                            <div class="dropdown-divider"></div>
+                            <!--<a href="/files/index/{{id}}?ocr=true" class="text-info dropdown-item"><i class="fa fa-download"></i> OCR test</a>
+                                            <div class="dropdown-divider"></div>-->
+                            <button type="button" class="text-danger dropdown-item"
+                                    onclick="confirmDelete('{{name}}.{{extension}}','{{id}}', '/files/index/{{id}}?delete=true&dir=
+                                        {{dir.id}}
+                                            ');"><i
+                                    class="fa fa-trash"></i> Effacer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        {{/each}}
+    </div>
+{{/unless}}
+</div>
+
+
+{{!-- Send Mail Modal --}}
+<div class="modal fade" id="modalSendByEmail" tabindex="-1" role="dialog" aria-labelledby="modalSendByEmail"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="title">Partager par Email</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fermer">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body text-center">
+                <div class="form-group">
+                    <input type="text" class="border-primary form-control" name="email" id="email" placeholder="Mail:"
+                           aria-label="Mail:">
+                </div>
+                <div class="form-group">
+                    <input type="text" class="border-primary form-control" name="email_subject" id="email_subject"
+                           placeholder="Sujet:" aria-label="Subject:">
+                </div>
+                <div class="form-group">
+                    <textarea class="border-primary form-control" rows="5" name="email_body" id="email_body"
+                              placeholder="Texte"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Pièces jointes</label>
+                    <div id="email_attachments" class="border-primary"
+                         style="border-width: 1px; border-style: solid; padding: 5px">
+
+                    </div>
+
+                </div>
+                <div class="input-group-append ">
+                    <button onclick="sendFilesByEmail();" class="btn btn-primary" id="sendMailBtn"><i
+                            class="fa fa-user"></i>
+                        Envoyer
+                    </button>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{!-- Preview Modal --}}
+<div class="modal fade" id="modalPreview" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-preview-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="title"></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" style="height: 1px; text-align: center;">
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{{!-- New Folder Modal --}}
+<div class="modal fade" id="modalNewFolder" tabindex="-1" role="dialog" aria-labelledby="modalNewFolder"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="title">Créer un répertoire</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fermer">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form method="POST" action="">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="folder">Folder name</label>
+                        <input type="text" class="form-control" name="folder" id="folder" aria-describedby="folderhelp"
+                               placeholder="Nom:">
+                        <small id="folderhelp" class="form-text text-muted">Ne laissez pas le nom du dossier
+                            vide.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-success">Créer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{{!-- Delete Modal --}}
+<div class="modal text-center fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModal"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="title">Êtes-vous sûr?</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fermer">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Vous êtes sur le point de supprimer le fichier:<br> <b id="name">--name--</b>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                <a id="targetAddress" href="#" class="btn btn-danger">Je suis sûr. Supprime-le.</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{!-- Share with Link Modal --}}
+<div class="modal fade" id="shareModal" tabindex="-1" role="dialog" aria-labelledby="shareModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="title">Partager avec l'utilisateur</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fermer">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div id="group" class="modal-body text-center">
+                <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                    <label class="btn btn-secondary active">
+                        <input type="radio" name="options" id="option1" autocomplete="off" checked><i
+                            class="fa fa-envelope"></i> Mail
+                    </label>
+                    <label class="btn btn-secondary">
+                        <input type="radio" name="options" id="option2" autocomplete="off"><i class="fa fa-user"></i>
+                        Nom d'utilisateur
+                    </label>
+                </div>
+                <div class="col-md-8 input-group col-centered mt-3 mb-5">
+                    <input type="text" class="border-primary form-control" name="email" placeholder="Mail:"
+                           aria-label="Mail:">
+                    <div class="input-group-append">
+                        <button onclick="sharewith(this);" class="btn btn-primary"><i class="fa fa-user"></i>
+                            Partager
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{!-- DeleteAll Modal --}}
+<div class="modal text-center fade" id="modalDeleteAll" tabindex="-1" role="dialog" aria-labelledby="modalDeleteAll"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="title">Êtes-vous sûr?</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fermer">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Vous êtes sur le point de supprimer tous les fichiers sélectionnés:<br>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                <button onclick="deleteAll();" class="btn btn-danger">Je suis sûr. Supprime-les.</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{!-- Delete Files Modal --}}
+<div class="modal text-center fade" id="modalDeletedFiles" tabindex="-1" role="dialog"
+     aria-labelledby="modalDeletedFiles" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="title">Fichiers supprimés</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fermer">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                {{#if deletedfiles}}
+                    <div id="files-top" class="list-group row col-md-10 col-centered">
+                        <div style="z-index: 1;" class="list-group-item d-flex">
+                            <div class="col-4"><span>Type :</span></div>
+                            <div class="col-4 text-center"><span>Nom :</span></div>
+                            <div class="col-4 text-right"><span>Choisir :</span></div>
+                        </div>
+                        {{#each deletedfiles}}
+                            <div class="list-group-item d-flex">
+                                <div class="col-4">
+                                    <span class="file-img" style="background-image: url(/images/{{icon}}.png);"></span>
+                                </div>
+                                <div class="col-4 text-center">
+                                    <span class="file-name">{{name}}.{{extension}}</span>
+                                </div>
+                                <div class="btn-group flex-row-reverse col-4">
+
+                                    <button class="align-middle btn btn-outline-primary btn-circle" type="button"
+                                            onclick="selectdeleted($(this));">
+                                        <i class="fa"></i>
+                                        <input class="hash" type="hidden" value="{{id}}">
+                                    </button>
+                                </div>
+                            </div>
+                        {{/each}}
+                        <br>
+                    </div>
+                {{else}}
+                    Vous n'avez pas de fichiers supprimés.
+                    <br>
+                {{/if}}
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                    <button onclick="restoreFiles();" class="btn btn-success">Restaurer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var files = [];
+    var fileNames = [];
+
+    var sharefile;
+
+    function sendFilesByEmail() {
+        if (files.length < 1) {
+            toastr.error('Aucun fichier n\'est sélectionné', 'Envoyé par email');
+            return;
+        }
+
+        let modal = $('#modalSendByEmail');
+
+        let data = {
+            by: 'email',
+            to: modal.find('#email')
+                    .val(),
+            subject: modal.find('#email_subject')
+                    .val(),
+            body: modal.find('#email_body')
+                    .val(),
+            files: files
+        };
+
+        modal.find('#sendMailBtn')
+                .attr('disabled', 'disabled');
+
+        $.ajax({
+            type: 'POST',
+            data: JSON.stringify(data),
+            url: '/files/shareFilesBy',
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            success: function (res) {
+                modal.find('#sendMailBtn')
+                        .removeAttr('disabled');
+                if (!res.ok) {
+                    toastr.error(res.message);
+                } else {
+                    modal.find('#email')
+                            .val('');
+                    modal.find('#email_subject')
+                            .val('');
+                    modal.find('#email_body')
+                            .val('');
+                    modal.modal('hide');
+                    toastr.success(res.message);
+                }
+
+            },
+            error: function (err) {
+                modal.find('#sendMailBtn')
+                        .removeAttr('disabled');
+            }
+        });
+    }
+
+    function openModal(name, id, mimetype) {
+
+        let modal = $('#modalPreview');
+        let src = '/files/index/' + id;
+
+        modal.find('.modal-content')
+                .css('height', window.innerHeight - 100);
+        modal.find('#title')
+                .text(name);
+        let modalBody = modal.find('.modal-body');
+
+        if (mimetype.startsWith('image')) {
+            modalBody.css('overflow-x', 'hidden');
+            let img = $('<img/>')
+                    .attr('src', src);
+            modalBody.html(img);
+        } else {
+            modalBody.css('overflow-x', 'unset');
+            let iframe = $('<iframe/>')
+                    .attr('height', '100%')
+                    .attr('width', '100%')
+                    .attr('src', src);
+            modalBody.html(iframe);
+        }
+        modal.modal('show');
+    }
+
+    function confirmDelete(name, id, targetAddress) {
+        let modal = $('#deleteModal');
+        modal.find('#name')
+                .text(name);
+        modal.find('#targetAddress')
+                .attr('href', targetAddress);
+        modal.modal('show');
+    }
+
+    function fillEmailAttachments() {
+        let target = $('#email_attachments');
+        target.html('');
+        fileNames.forEach(function (name) {
+            let a = $('<a/>')
+                    .addClass('btn btn-dark')
+                    .attr('href', '#')
+                    .css('margin', '3px')
+                    .text(name);
+            target.append(a);
+        });
+    }
+
+    function copyAll() {
+        setCookie('copies', JSON.stringify(files), 1);
+    }
+
+    function setShare(id) {
+        sharefile = id;
+        let modal = $('#shareModal');
+        modal.modal('show');
+    }
+
+    function sharewith(element) {
+        var email = $(element)
+                .parent()
+                .parent()
+                .children('input')
+                .val();
+        $.get('/files/index/' + sharefile + '?share=' + email, function () {
+            $('#shareModal #group')
+                    .html('<label for=\'#textlink\'>Share with this link:</label><textarea id=\'textlink\' class=\'col-centered centered col-12 form-text text-muted input-group-text\'>' + window.location.origin + '/files/index/' + sharefile + '</textarea>');
+        });
+    }
+
+    function initselect() {
+        var tool = $('#selecttoolbar');
+        var files = $('#files-top')
+                .children('.list-group-item')
+                .slice(1)
+                .children('.btn-group')
+                .children('.dropdown')
+                .children('button');
+        if (tool.hasClass('d-none')) {
+            tool.removeClass('d-none');
+            files.addClass('d-none');
+            files.parent()
+                    .children('.select')
+                    .removeClass('d-none');
+        } else {
+            tool.addClass('d-none');
+            files.removeClass('d-none');
+            files.parent()
+                    .children('.select')
+                    .addClass('d-none');
+        }
+    }
+
+    function deleteAll() {
+        let i;
+        let url = window.location.pathname.split('/')
+                .pop();
+        for (i = 0; i < files.length; i++) {
+            if (files[i].split('-')[1] == 'folder') {
+                $.get('/files/' + files[i].split('-')[0] + '?delete=' + url);
+            } else {
+                $.get('/files/index/' + files[i].split('-')[0] + '?delete=' + url);
+            }
+        }
+        location.reload();
+    }
+
+    function getCookie(cname) {
+        let name = cname + '=';
+        let decodedCookie = decodeURIComponent(document.cookie);
+        let ca = decodedCookie.split(';');
+        for (let i = 0; i < ca.length; i++) {
+            let c = ca[i];
+            while (c.charAt(0) == ' ') {
+                c = c.substring(1);
+            }
+            if (c.indexOf(name) == 0) {
+                return c.substring(name.length, c.length);
+            }
+        }
+        return '';
+    }
+
+    function setCookie(cname, cvalue, exdays) {
+        let d = new Date();
+        d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+        let expires = 'expires=' + d.toUTCString();
+        document.cookie = cname + '=' + cvalue + ';' + expires + ';path=/';
+    }
+
+    function pasteAll() {
+        let i;
+        let parts = window.location.href.split('/');
+        let lastSegment = parts.pop() || parts.pop();
+        let copies = JSON.parse(getCookie('copies'));
+        if (lastSegment == 'files') {
+            lastSegment = 'undefined';
+        }
+        ;
+        for (i = 0; i < copies.length; i++) {
+            if (copies[i].split('-')[1] == 'folder') {
+                $.get('/files/' + copies[i].split('-')[0] + '?paste=' + lastSegment);
+            } else {
+                $.get('/files/index/' + copies[i].split('-')[0] + '?paste=' + lastSegment);
+            }
+        }
+        setTimeout(function () {
+            location.reload();
+        }, 1000);
+    }
+
+    function moveAll() {
+        let i;
+        let parts = window.location.href.split('/');
+        let lastSegment = parts.pop() || parts.pop();
+        let copies = JSON.parse(getCookie('copies'));
+        if (lastSegment == 'files') {
+            lastSegment = 'undefined';
+        }
+        ;
+        for (i = 0; i < copies.length; i++) {
+            if (copies[i].split('-')[1] == 'folder') {
+                $.get('/files/' + copies[i].split('-')[0] + '?move=' + lastSegment);
+                console.log('/files/' + copies[i].split('-')[0] + '?move=' + lastSegment);
+            } else {
+                $.get('/files/index/' + copies[i].split('-')[0] + '?move=' + lastSegment);
+            }
+        }
+        setTimeout(function () {
+            location.reload();
+        }, 1000);
+    }
+
+    function convertToPdf(id) {
+        $.get('/files/index/' + id + '?convertto=pdf')
+                .then(function () {
+                    location.reload();
+                });
+    }
+
+    function selectAll(selectAllButton) {
+        let icon = selectAllButton.find('i');
+        if (icon.hasClass('fa-check-circle')) {
+            icon.removeClass('fa-check-circle');
+            icon.addClass('fa-circle');
+            selectAllButton.attr('title', 'Tout Déselectionner');
+            $('button.select.btn-outline-primary')
+                    .each(function (i, button) {
+                        select($(button));
+                    });
+        } else {
+            icon.removeClass('fa-circle');
+            icon.addClass('fa-check-circle');
+            selectAllButton.attr('title', 'Tout Sélectionner');
+            $('button.select.btn-primary')
+                    .each(function (i, button) {
+                        select($(button));
+                    });
+        }
+    }
+
+    function select(button) {
+        if (event) {
+            event.stopPropagation();
+        }
+        if (button.hasClass('btn-primary')) {
+            //Checked button.parent().parent().removeClass("itemonlistactive");
+            button.addClass('btn-outline-primary');
+            button.removeClass('btn-primary');
+            button.children('i')
+                    .removeClass('fa-check');
+            for (var i = files.length - 1; i >= 0; i--) {
+                if (files[i] === button.children('input.hash')
+                                .val() + '-' +
+                        button.children('input.type')
+                                .val()) {
+                    files.splice(i, 1);
+                    fileNames.splice(i, 1);
+                }
+            }
+        } else {
+            //To Check
+            button.parent()
+                    .parent()
+                    .addClass('itemonlistactive');
+            button.addClass('btn-primary');
+            button.removeClass('btn-outline-primary');
+            button.children('i')
+                    .addClass('fa-check');
+            files.push(button.children('input.hash')
+                    .val() + '-' + button.children('input.type')
+                    .val());
+            fileNames.push(button.children('input.name')
+                    .val());
+        }
+    }
+
+    function renameList(element) {
+        var filename = $(element)
+                .parent()
+                .parent()
+                .parent()
+                .parent()
+                .children('div.col-7')
+                .children('.file-name')
+                .html();
+        $(element)
+                .parent()
+                .parent()
+                .parent()
+                .parent()
+                .children('div.col-7')
+                .attr('onclick', '');
+        var extension = filename.split('.')[1];
+        filename = filename.split('.')[0];
+
+        var dir = $('#dirVal')
+                .val();
+        if (extension != undefined) {
+            var hash = '/files/index/' + $(element)
+                    .parent()
+                    .parent()
+                    .children('input[type=\'hidden\']')
+                    .val();
+            $(element)
+                    .parent()
+                    .parent()
+                    .parent()
+                    .parent()
+                    .children('div.col-7')
+                    .children('.file-name')
+                    .replaceWith('<form class="file-name" action="' + hash + '" method="GET"><input type="hidden" name="dirto" value="' + dir + '"><div class="input-group"><input name="filename" type="text" class="form-control" placeholder="Renommer: " value="' + filename + '" aria-label="Renommer: " aria-describedby="basic-addon2"><div class="input-group-append"><span class="input-group-text">.' + extension + '</span><button type="submit" class="form-control btn btn-outline-secondary" >Change</button></div></div></form>');
+        } else {
+            var hash = '/files/' + $(element)
+                    .parent()
+                    .parent()
+                    .parent()
+                    .parent()
+                    .children('input[type=\'hidden\']')
+                    .val();
+            $(element)
+                    .parent()
+                    .parent()
+                    .parent()
+                    .parent()
+                    .children('div.col-7')
+                    .children('.file-name')
+                    .replaceWith('<form class="file-name" action="' + hash + '" method="GET"><div class="input-group"><input name="filename" type="text" class="form-control" placeholder="Renommer: " value="' + filename + '" aria-label="Renommer: " aria-describedby="basic-addon2"><div class="input-group-append"><button type="submit" class="form-control btn btn-outline-secondary" >Change</button></div></div></form>');
+        }
+    };
+
+    function renameGrid(element) {
+        var filename = $(element)
+                .parent()
+                .parent()
+                .parent()
+                .children('h5.card-title')
+                .html();
+        var extension = filename.split('.')[1];
+        filename = filename.split('.')[0];
+
+        var dir = $('#dirVal')
+                .val();
+        if (extension != undefined) {
+            var hash = '/files/index/' + $(element)
+                    .parent()
+                    .parent()
+                    .children('input[type=\'hidden\']')
+                    .val();
+            $(element)
+                    .parent()
+                    .parent()
+                    .parent()
+                    .children('h5.card-title')
+                    .replaceWith('<form class="file-name" action="' + hash + '" method="GET"><input type="hidden" name="dirto" value="' + dir + '"><div class="input-group"><input name="filename" type="text" class="form-control" placeholder="Renommer: " value="' + filename + '" aria-label="Renommer: " aria-describedby="basic-addon2"><div class="input-group-append"><span class="input-group-text">.' + extension + '</span></div></div><br><button type="submit" class="form-control btn btn-outline-secondary" >Change</button></form>');
+        } else {
+            var hash = '/files/' + $(element)
+                    .parent()
+                    .parent()
+                    .children('input[type=\'hidden\']')
+                    .val();
+            $(element)
+                    .parent()
+                    .parent()
+                    .parent()
+                    .children('h5.card-title')
+                    .replaceWith('<form class="file-name" action="' + hash + '" method="GET"><div class="input-group"><input name="filename" type="text" class="form-control" placeholder="Renommer: " value="' + filename + '" aria-label="Renommer: " aria-describedby="basic-addon2"><div class="input-group-append"></div></div><br><button type="submit" class="form-control btn btn-outline-secondary" >Change</button></form>');
+        }
+    };
+
+    let isMobile = Math.min(window.screen.width, window.screen.height) < 720 || navigator.userAgent.indexOf('Mobi') > -1;
+
+    $(document)
+            .ready(function () {
+                $('.btn-group-toggle > label')
+                        .click(function () {
+                            if ($('#option1')
+                                    .is(':checked')) {
+                                $('#email')
+                                        .attr({ 'name': 'username' });
+                                $('#email')
+                                        .attr({ 'placeholder': 'Nom d\'utilisateur: ' });
+                            } else {
+                                $('#email')
+                                        .attr({ 'name': 'email' });
+                                $('#email')
+                                        .attr({ 'placeholder': 'Mail: ' });
+                            }
+                        });
+
+                $('[draggable="true"]')
+                        .each(function (i, item) {
+
+                            if (!isMobile) {
+                                item.addEventListener('dragstart', handleDragStart, false);
+                                item.addEventListener('dragend', handleDragEnd, false);
+                                item.addEventListener('dragenter', handleDragEnter, false);
+                                item.addEventListener('dragleave', handleDragLeave, false);
+                                item.addEventListener('dragover', handleDragOver, false);
+                                item.addEventListener('drop', handleDrop, false);
+                                item.addEventListener('drag', handleDrag, false);
+                            } else {
+                                item.addEventListener('mouseup', cancelTouchTimer, false);
+                                item.addEventListener('touchmove', cancelTouchTimer, false);
+                                item.addEventListener('touchstart', touchstart, false);
+                            }
+                            //if (isMobile) {
+                            //    item.addEventListener('touchstart', function () {
+                            //
+                            //    }, false);
+                            //
+                            //    item.addEventListener('touchend', function () {
+                            //
+                            //    }, false);
+                            //
+                            //    item.addEventListener('touchmove', function (e) {
+                            //        e.preventDefault();
+                            //        let touchLocation = e.targetTouches[0];
+                            //
+                            //        // assign box new coordinates based on the touch.
+                            //        this.style.left = touchLocation.pageX + 'px';
+                            //        this.style.right = touchLocation.pageY + 'px';
+                            //        this.style.opacity = 0.6;
+                            //    });
+                            //
+                            //    item.addEventListener('touchleave', function () {
+                            //        console.log('btn moving end');
+                            //    });
+                            //
+                            //    item.addEventListener('touchcancel', function () {
+                            //        console.log('btn moving cancel');
+                            //    });
+                            //
+                            //}
+                            //else {
+                            //
+                            //}
+                        });
+            });
+
+    var deletedfiles = [];
+
+    function selectdeleted(button) {
+        if (button.hasClass('btn-primary')) {
+            //Checked
+            button.addClass('btn-outline-primary');
+            button.removeClass('btn-primary');
+            button.children('i')
+                    .removeClass('fa-check');
+            for (var i = deletedfiles.length - 1; i >= 0; i--) {
+                if (deletedfiles[i] === button.children('input.hash')
+                        .val()) {
+                    deletedfiles.splice(i, 1);
+                }
+            }
+        } else {
+            //To Check
+            button.addClass('btn-primary');
+            button.removeClass('btn-outline-primary');
+            button.children('i')
+                    .addClass('fa-check');
+            deletedfiles.push(button.children('input.hash')
+                    .val());
+        }
+    }
+
+    function restoreFiles() {
+        if (deletedfiles.length != 0) {
+            for (var i = deletedfiles.length - 1; i >= 0; i--) {
+                $.get('/files/restoredeleted/' + deletedfiles[i]);
+            }
+            setTimeout(function () {
+                location.reload();
+            }, 1000);
+        } else {
+            alert('Please select a file');
+        }
+    }
+
+    let dragSrcEl;
+    let stop = true;
+
+    function handleDragStart(e) {
+        this.style.opacity = '0.4';
+
+        dragSrcEl = this;
+
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/html', this.innerHTML);
+    }
+
+    function handleDragEnd(e) {
+        this.style.opacity = '1';
+        stop = true;
+        $('[draggable="true"]')
+                .each(function (i, item) {
+                    item.classList.remove('over');
+                });
+    }
+
+    function handleDragOver(e) {
+        let isFolder = $(this)
+                .attr('data-folder') == 'true';
+        let deletable = !($(dragSrcEl)
+                .find('#notDeletable')
+                .val() == 'true');
+
+        if (deletable && isFolder && e.preventDefault && this !== dragSrcEl) {
+            e.preventDefault();
+        }
+
+        if (e.clientY < 150) {
+            stop = false;
+            scroll(-1);
+        }
+
+        if (e.clientY > ($(window)
+                .height() - 150)) {
+            stop = false;
+            scroll(1);
+        }
+
+        return false;
+    }
+
+    function handleDragEnter(e) {
+        $('[draggable="true"]')
+                .each(function (i, item) {
+                    item.classList.remove('over');
+                });
+        this.classList.add('over');
+    }
+
+    function handleDragLeave(e) {
+        //this.classList.remove('over');
+    }
+
+    function handleDrag(e) {
+        stop = true;
+    }
+
+    function handleDrop(e) {
+        e.stopPropagation(); // stops the browser from redirecting.
+        if (dragSrcEl !== this) {
+            let isFolder = $(dragSrcEl)
+                    .attr('data-folder') == 'true';
+            let thisIsFolder = $(this)
+                    .attr('data-folder') == 'true';
+            let deletable = !($(dragSrcEl)
+                    .find('#notDeletable')
+                    .val() == 'true');
+
+            if (thisIsFolder && deletable) {
+                id = $(dragSrcEl)
+                        .find('#id')
+                        .val();
+                moveToId = $(this)
+                        .find('#id')
+                        .val();
+
+                let url = '/files/move/' + id + '?to=' + moveToId + '&isFolder=' + isFolder;
+                $.get(url, function (data) {
+                    //window.location.reload();
+                    $(dragSrcEl)
+                            .remove();
+                });
+            }
+        }
+        return false;
+    }
+
+    function scroll(step) {
+        var scrollY = $(window)
+                .scrollTop();
+        $(window)
+                .scrollTop(scrollY + step);
+        if (!stop) {
+            setTimeout(function () {
+                scroll(step);
+            }, 20);
+        }
+    }
+
+    var touchTimer;
+    const touchDuration = 600;
+
+    function touchstart(e) {
+        let item = this;
+        touchTimer = setTimeout(function () {
+            touchTimer = null;
+            onLongTouch(item);
+        }, touchDuration);
+        return false;
+    }
+
+    function cancelTouchTimer(e) {
+        if (touchTimer) {
+            clearTimeout(touchTimer);
+            //e.preventDefault();
+            //$(this).find('div[onclick]:first').click();
+        } else {
+            e.preventDefault();
+        }
+        return false;
+    }
+
+    function onLongTouch(item) {
+        console.log(item);
+        $(item)
+                .find('.select.btn')
+                .click();
+        //alert(this);
+    }
+
+</script>
